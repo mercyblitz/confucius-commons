@@ -91,5 +91,35 @@ public class ReflectionUtilTest extends TestCase {
     public void testGetCallerPackage() {
         Class<?> expectedClass = ReflectionUtilTest.class;
         Package expectedPackage = expectedClass.getPackage();
+
+        Assert.assertEquals(expectedPackage, ReflectionUtil.getCallerPackage());
+    }
+
+    public void testGetCallerClassNamePerformance() {
+
+        for (int i = 0; i < 6; i++) {
+            int times = (int) Math.pow(10 + .0, i + .0);
+            testGetCallerClassNameInSunJVMPerformance(times);
+            testGetCallerClassNameInGeneralJVMPerformance(times);
+            System.out.println();
+        }
+    }
+
+    private void testGetCallerClassNameInSunJVMPerformance(int times) {
+        long startTime = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
+            ReflectionUtil.getCallerClassNameInSunJVM();
+        }
+        long costTime = System.currentTimeMillis() - startTime;
+        System.out.printf("It's cost to execute ReflectionUtil.getCallerClassNameInSunJVM() %d times : %d ms！\n", times, costTime);
+    }
+
+    private void testGetCallerClassNameInGeneralJVMPerformance(int times) {
+        long startTime = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
+            ReflectionUtil.getCallerClassNameInGeneralJVM();
+        }
+        long costTime = System.currentTimeMillis() - startTime;
+        System.out.printf("It's cost to execute ReflectionUtil.getCallerClassNameInGeneralJVM() %d times : %d ms！\n", times, costTime);
     }
 }

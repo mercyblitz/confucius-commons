@@ -1,12 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>groupId</groupId>
+    <groupId>org.confucius.commons</groupId>
     <artifactId>confucius-commons</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Confucius Commons Project</name>
+    <description>Confucius Commons project is focus on Java commons utility library , it's not a duplicate for Apache
+        Commons or
+        Spring , but supplement. Required : SUN JDK 6+
+    </description>
+    <url>https://github.com/mercyblitz/confucius-commons</url>
 
-    
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/mercyblitz/confucius-commons</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>mercyblitz</id>
+            <name>Mercy Ma</name>
+            <email>mercyblitz@gmail.com</email>
+            <organization>confucius.org</organization>
+            <roles>
+                <role>developer</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <modules>
+        <module>confucius-commons-parent</module>
+        <module>confucius-commons-lang</module>
+    </modules>
+
+    <properties>
+        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.6</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[2.2.1,)</version>
+                                    <message>Please use Maven 2.2.1 or any later version.</message>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

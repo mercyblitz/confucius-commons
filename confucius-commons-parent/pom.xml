@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>confucius-commons</artifactId>
@@ -12,6 +12,107 @@
     <groupId>org.confucius.commons</groupId>
     <artifactId>confucius-commons-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Confucius Commons Parent</name>
+    <description>Confucius Commons Parent</description>
 
+    <properties>
+        <java.version>1.6</java.version>
+        <commons.lang.version>1.0.0-SNAPSHOT</commons.lang.version>
+
+        <apache.commons.lang3.version>3.4</apache.commons.lang3.version>
+        <apache.commons.io.version>2.4</apache.commons.io.version>
+
+        <jsr305.version>3.0.1</jsr305.version>
+        <slf4j.version>1.6.1</slf4j.version>
+        <log4j.version>1.2.16</log4j.version>
+        <guava.version>19.0.20150826</guava.version>
+        <junit.version>4.7</junit.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+    </dependencies>
+
+    <dependencyManagement>
+
+        <dependencies>
+
+            <dependency>
+                <groupId>com.aliexpress.commons</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>${commons.lang.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>${jsr305.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${apache.commons.lang3.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${apache.commons.io.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+
+            <!-- Testing -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
+
+        </dependencies>
+
+    </dependencyManagement>
 
 </project>

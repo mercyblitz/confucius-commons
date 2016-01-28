@@ -1,5 +1,7 @@
 package org.confucius.commons.lang.process;
 
+import junit.framework.TestCase;
+
 /**
  * {@link ProcessExecutorTest}
  *
@@ -8,5 +10,11 @@ package org.confucius.commons.lang.process;
  * @see ProcessExecutorTest
  * @since 1.0.0 2016-01-28
  */
-public class ProcessExecutorTest {
+public class ProcessExecutorTest extends TestCase {
+
+    public void testExecute2() throws Exception {
+        ProcessExecutor executor = new ProcessExecutor("java");
+        executor.execute(System.out, 2000);
+    }
+
 }

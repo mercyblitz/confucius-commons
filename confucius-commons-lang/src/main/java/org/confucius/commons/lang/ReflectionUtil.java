@@ -1,22 +1,18 @@
-/**
- * Project   : commons-lang
- * File      : ReflectionUtil.java
- * Date      : 2012-1-5
- * Time      : ÏÂÎç01:29:58
- * Copyright : taobao.com Ltd.
- */
 package org.confucius.commons.lang;
 
-import com.google.common.collect.Lists;
+import org.apache.commons.lang3.reflect.ConstructorUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.List;
 
 /**
- * ·´Éä¹¤¾ßÀà
+ * Reflection Utility class , generic methods are defined from {@link FieldUtils} , {@link MethodUtils} , {@link
+ * ConstructorUtils}
  *
  * @author <a href="mailto:taogu.mxx@taobao.com">Mercy</a>
  * @version 1.0.0
@@ -24,18 +20,307 @@ import java.util.List;
  * @see Field
  * @see Constructor
  * @see Array
- * @since 1.0.0 2012-1-5 ÏÂÎç01:29:58
+ * @see MethodUtils
+ * @see FieldUtils
+ * @see ConstructorUtils
+ * @since 1.0.0
  */
-@SuppressWarnings("unchecked")
-public class ReflectionUtil extends BaseUtil {
+public abstract class ReflectionUtil {
 
     /**
-     * ¶ÏÑÔÊÇ·ñÎªºÏ·¨Êı×éË÷Òı
+     * Sun JDK å®ç°ç±»ï¼šsun.reflect.Reflectionå…¨åç§°
+     */
+    public static final String SUN_REFLECT_REFLECTION_CLASS_NAME = "sun.reflect.Reflection";
+
+    /**
+     * Current Type
+     */
+    private static final Class<?> TYPE = ReflectionUtil.class;
+    /**
+     * sun.reflect.Reflectionæ–¹æ³•åç§°
+     */
+    private static final String getCallerClassMethodName = "getCallerClass";
+    /**
+     * sun.reflect.Reflection invocation frame
+     */
+    private static final int sunReflectReflectionInvocationFrame;
+    /**
+     * {@link StackTraceElement} invocation frame
+     */
+    private static final int stackTraceElementInvocationFrame;
+    /**
+     * Is Supported sun.reflect.Reflection ?
+     */
+    private static final boolean supportedSunReflectReflection;
+    /**
+     * sun.reflect.Reflection#getCallerClass(int) method
+     */
+    private static final Method getCallerClassMethod;
+
+    // Initialize sun.reflect.Reflection
+    static {
+        Method method = null;
+        boolean supported = false;
+        int invocationFrame = 0;
+        try {
+            // Use sun.reflect.Reflection to calculate frame
+            Class<?> type = Class.forName(SUN_REFLECT_REFLECTION_CLASS_NAME);
+            method = type.getMethod(getCallerClassMethodName, int.class);
+            method.setAccessible(true);
+            // Adapt SUN JDK ,The value of invocation frame in JDK 6/7/8 may be different
+            for (int i = 0; i < 9; i++) {
+                Class<?> callerClass = (Class<?>) method.invoke(null, i);
+                if (TYPE.equals(callerClass)) {
+                    invocationFrame = i;
+                    break;
+                }
+            }
+            supported = true;
+        } catch (Exception e) {
+            method = null;
+            supported = false;
+        }
+        // set method info
+        getCallerClassMethod = method;
+        supportedSunReflectReflection = supported;
+        // getCallerClass() -> getCallerClass(int)
+        // Plugs 1 , because Invocation getCallerClass() method was considered as increment invocation frame
+        // Plugs 1 , because Invocation getCallerClass(int) method was considered as increment invocation frame
+        sunReflectReflectionInvocationFrame = invocationFrame + 2;
+    }
+
+    // Initialize StackTraceElement
+    static {
+        int invocationFrame = 0;
+        // Use java.lang.StackTraceElement to calculate frame
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        for (StackTraceElement stackTraceElement : stackTraceElements) {
+            String className = stackTraceElement.getClassName();
+            if (TYPE.getName().equals(className)) {
+                break;
+            }
+            invocationFrame++;
+        }
+        // getCallerClass() -> getCallerClass(int)
+        // Plugs 1 , because Invocation getCallerClass() method was considered as increment invocation frame
+        // Plugs 1 , because Invocation getCallerClass(int) method was considered as increment invocation frame
+        stackTraceElementInvocationFrame = invocationFrame + 2;
+    }
+
+
+    private ReflectionUtil() {
+
+    }
+
+    /**
+     * Get Caller class
      *
-     * @param array Êı×é¶ÔÏó
-     * @param index Ë÷Òı
-     * @throws IllegalArgumentException       ²Î¿¼{@link ReflectionUtil#assertArrayType(Object)}
-     * @throws ArrayIndexOutOfBoundsException µ±<code>index</code>Ğ¡ÓÚ0£¬»òÕß´óÓÚ»òµÈÓÚÊı×é³¤¶È
+     * @return è·å–è°ƒç”¨è¯¥æ–¹æ³•çš„Class name
+     * @version 1.0.0
+     * @since 1.0.0
+     */
+    @Nonnull
+    public static String getCallerClassName() {
+        return getCallerClassName(sunReflectReflectionInvocationFrame);
+    }
+
+    /**
+     * è·å–æŒ‡å®šå±‚æ¬¡çš„è°ƒç”¨Class name
+     *
+     * @param invocationFrame
+     *         invocation frame
+     * @return Class name under specified invocation frame
+     * @throws IndexOutOfBoundsException
+     *         å½“<code>invocationFrame</code>æ•°å€¼ä¸ºè´Ÿæ•°æˆ–è€…è¶…å‡ºå®é™…çš„å±‚æ¬¡
+     * @version 1.0.0
+     * @see Thread#getStackTrace()
+     * @since 1.0.0
+     */
+    @Nonnull
+    protected static String getCallerClassName(int invocationFrame) throws IndexOutOfBoundsException {
+        if (supportedSunReflectReflection) {
+            Class<?> callerClass = getCallerClassInSunJVM(invocationFrame + 1);
+            if (callerClass != null)
+                return callerClass.getName();
+        }
+        return getCallerClassNameInGeneralJVM(invocationFrame + 1);
+    }
+
+    /**
+     * é€šç”¨å®ç°æ–¹å¼ï¼Œè·å–è°ƒç”¨ç±»å
+     *
+     * @return è°ƒç”¨ç±»å
+     * @version 1.0.0
+     * @see #getCallerClassNameInGeneralJVM(int)
+     * @since 1.0.0 2012-3-15 ä¸‹åˆ03:09:28
+     */
+    static String getCallerClassNameInGeneralJVM() {
+        return getCallerClassNameInGeneralJVM(stackTraceElementInvocationFrame);
+    }
+
+    /**
+     * é€šç”¨å®ç°æ–¹å¼ï¼Œé€šè¿‡æŒ‡å®šè°ƒç”¨å±‚æ¬¡æ•°å€¼ï¼Œè·å–è°ƒç”¨ç±»å
+     *
+     * @param invocationFrame
+     *         invocation frame
+     * @return specified invocation frame ç±»
+     * @throws IndexOutOfBoundsException
+     *         å½“<code>invocationFrame</code>æ•°å€¼ä¸ºè´Ÿæ•°æˆ–è€…è¶…å‡ºå®é™…çš„å±‚æ¬¡
+     * @version 1.0.0
+     * @see
+     * @since 1.0.0 2012-3-15 ä¸‹åˆ02:43:47
+     */
+    static String getCallerClassNameInGeneralJVM(int invocationFrame) throws IndexOutOfBoundsException {
+        StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+        StackTraceElement targetStackTraceElement = elements[invocationFrame];
+        return targetStackTraceElement.getClassName();
+    }
+
+    static Class<?> getCallerClassInSunJVM(int realFramesToSkip) throws UnsupportedOperationException {
+        if (!supportedSunReflectReflection) {
+            throw new UnsupportedOperationException("éœ€è¦SUNçš„JVMï¼");
+        }
+        Class<?> callerClass = null;
+        if (getCallerClassMethod != null) {
+            try {
+                callerClass = (Class<?>) getCallerClassMethod.invoke(null, realFramesToSkip);
+            } catch (Exception ignored) {
+            }
+        }
+        if (callerClass != null) {
+        }
+        return callerClass;
+    }
+
+    /**
+     * Get caller class in General JVM
+     *
+     * @param invocationFrame
+     *         invocation frame
+     * @return caller class
+     * @version 1.0.0
+     * @see #getCallerClassNameInGeneralJVM(int)
+     * @since 1.0.0
+     */
+    static Class<?> getCallerClassInGeneralJVM(int invocationFrame) {
+        String className = getCallerClassNameInGeneralJVM(invocationFrame + 1);
+        Class<?> targetClass = null;
+        try {
+            targetClass = Class.forName(className);
+        } catch (ClassNotFoundException impossibleException) {
+            throw new IllegalStateException("How can?");
+        }
+        return targetClass;
+    }
+
+    /**
+     * Get caller class
+     * <p/>
+     * For instance,
+     * <pre>
+     *     package com.acme;
+     *     import ...;
+     *     class Foo {
+     *         public void bar(){
+     *
+     *         }
+     *     }
+     * </pre>
+     *
+     * @return Get caller class
+     * @throws IllegalStateException
+     *         æ— æ³•æ‰¾åˆ°è°ƒç”¨ç±»æ—¶
+     * @version 1.0.0
+     * @since 1.0.0 2012-2-28 ä¸‹åˆ07:42:26
+     */
+    @Nonnull
+    public static Class<?> getCallerClass() throws IllegalStateException {
+        return getCallerClass(sunReflectReflectionInvocationFrame);
+    }
+
+    /**
+     * Get caller class In SUN HotSpot JVM
+     *
+     * @return Caller Class
+     * @throws UnsupportedOperationException
+     *         If JRE is not a SUN HotSpot JVM
+     * @version 1.0.0
+     * @see #getCallerClassInSunJVM(int)
+     * @since 1.0.0
+     */
+    static Class<?> getCallerClassInSunJVM() throws UnsupportedOperationException {
+        return getCallerClassInSunJVM(sunReflectReflectionInvocationFrame);
+    }
+
+    /**
+     * Get caller class name In SUN HotSpot JVM
+     *
+     * @return Caller Class
+     * @throws UnsupportedOperationException
+     *         If JRE is not a SUN HotSpot JVM
+     * @version 1.0.0
+     * @see #getCallerClassInSunJVM(int)
+     * @since 1.0.0
+     */
+    static String getCallerClassNameInSunJVM() throws UnsupportedOperationException {
+        Class<?> callerClass = getCallerClassInSunJVM(sunReflectReflectionInvocationFrame);
+        return callerClass.getName();
+    }
+
+    /**
+     * @param invocationFrame
+     *         invocation frame
+     * @return
+     * @version 1.0.0
+     * @see
+     * @since 1.0.0
+     */
+    static Class<?> getCallerClass(int invocationFrame) {
+        if (supportedSunReflectReflection) {
+            Class<?> callerClass = getCallerClassInSunJVM(invocationFrame + 1);
+            if (callerClass != null)
+                return callerClass;
+        }
+        return getCallerClassInGeneralJVM(invocationFrame + 1);
+    }
+
+    /**
+     * Get caller class in General JVM
+     *
+     * @return Caller Class
+     * @version 1.0.0
+     * @see #getCallerClassInGeneralJVM(int)
+     * @since 1.0.0 2012-3-15 ä¸‹åˆ03:11:16
+     */
+    static Class<?> getCallerClassInGeneralJVM() {
+        return getCallerClassInGeneralJVM(stackTraceElementInvocationFrame);
+    }
+
+    /**
+     * Get caller class's {@link Package}
+     *
+     * @return caller class's {@link Package}
+     * @throws IllegalStateException
+     *         see {@link #getCallerClass()}
+     * @version 1.0.0
+     * @see #getCallerClass()
+     * @since 1.0.0
+     */
+    public static Package getCallerPackage() throws IllegalStateException {
+        return getCallerClass().getPackage();
+    }
+
+    /**
+     * Assert array index
+     *
+     * @param array
+     *         Array object
+     * @param index
+     *         index
+     * @throws IllegalArgumentException
+     *         see {@link ReflectionUtil#assertArrayType(Object)}
+     * @throws ArrayIndexOutOfBoundsException
+     *         If <code>index</code> is less than 0 or equals or greater than length of array
      */
     public static void assertArrayIndex(Object array, int index) throws IllegalArgumentException {
         if (index < 0) {
@@ -51,10 +336,12 @@ public class ReflectionUtil extends BaseUtil {
     }
 
     /**
-     * ¶ÏÑÔ²ÎÊıÊÇ·ñÊı×é
+     * Assert the object is array or not
      *
-     * @param array Êı×é¶ÔÏó
-     * @throws IllegalArgumentException µ±<code>array</code>²»ÊÇÊı×éÀàĞÍÊ±
+     * @param array
+     *         asserted object
+     * @throws IllegalArgumentException
+     *         if the object is not a array
      */
     public static void assertArrayType(Object array) throws IllegalArgumentException {
         Class<?> type = array.getClass();
@@ -65,16 +352,20 @@ public class ReflectionUtil extends BaseUtil {
     }
 
     /**
-     * ¶ÏÑÔÊÇ·ñ×Ö¶ÎÊÇ·ñÆ¥ÅäÆÚ´ıµÄÀàĞÍ
+     * Assert Field type match
      *
-     * @param object       ¶ÔÏó
-     * @param fieldName    ×Ö¶ÎÃû³Æ
-     * @param expectedType ÆÚ´ıµÄÀàĞÍ
-     * @throws IllegalArgumentException µ±ÀàĞÍ·şÎñÆ¥ÅäÊ±
+     * @param object
+     *         Object
+     * @param fieldName
+     *         field name
+     * @param expectedType
+     *         expected type
+     * @throws IllegalArgumentException
+     *         if type is not matched
      */
     public static void assertFieldMatchType(Object object, String fieldName, Class<?> expectedType) throws IllegalArgumentException {
         Class<?> type = object.getClass();
-        Field field = getField(type, fieldName);
+        Field field = FieldUtils.getDeclaredField(type, fieldName, true);
         Class<?> fieldType = field.getType();
         if (!expectedType.isAssignableFrom(fieldType)) {
             String message = String.format("The type[%s] of field[%s] in Class[%s] can't match expected type[%s]", fieldType.getName(), fieldName, type.getName(), expectedType.getName());
@@ -82,260 +373,6 @@ public class ReflectionUtil extends BaseUtil {
         }
     }
 
-    /**
-     * »ñÈ¡¶ÔÏóÖĞµÄ×Ö¶ÎÖµ
-     *
-     * @param object    ¶ÔÏó
-     * @param fieldName ×Ö¶ÎÃû³Æ
-     * @return Èç¹ûÕÒ²»µ½µÄ»°£¬·µ»Ø<code>null</code>
-     */
-    public static Object getFieldValue(Object object, String fieldName) {
-        Field field = getField(object.getClass(), fieldName);
-        Object value = null;
-        boolean accessible = field.isAccessible();
-        try {
-            field.setAccessible(true);
-            value = field.get(object);
-        } catch (Exception ignored) {
-        } finally {
-            field.setAccessible(accessible);
-        }
-        return value;
-    }
 
-    /**
-     * »ñÈ¡ÀàÖĞµÄ×Ö¶Î¶ÔÏó
-     *
-     * @param typeWithField ´ø×Ö¶ÎµÄÀà¶ÔÏó
-     * @param fieldName     ×Ö¶ÎÃû³Æ
-     * @return Èç¹ûÕÒ²»µ½µÄ»°£¬·µ»Ø<code>null</code>
-     * @throws IllegalArgumentException ÔÚÖÆ¶¨ÀàĞÍÖĞÎŞ·¨Í¨¹ı×Ö¶ÎÃû³Æ»ñÈ¡Ê±
-     * @throws NullPointerException     µ±²ÎÊıÎª<code>null</code>Ê±
-     */
-    public static Field getField(Class<?> typeWithField, String fieldName) throws IllegalArgumentException, NullPointerException {
-        Field field = null;
-        try {
-            field = typeWithField.getDeclaredField(fieldName);
-        } catch (NoSuchFieldException ignored) {
-            String message = String.format("Field[%s] can not be found in type[%s]", fieldName, typeWithField.getName());
-            throw new IllegalArgumentException(message);
-        }
-        return field;
-    }
-
-    /**
-     * ÉèÖÃÖ¸¶¨¶ÔÏó×Ö¶ÎµÄÖµ
-     *
-     * @param object     Ä¿±ê¶ÔÏó
-     * @param fieldName  ×Ö¶ÎÃû³Æ
-     * @param fieldValue ×Ö¶ÎÖµ
-     */
-    public static void setFiled(Object object, String fieldName, Object fieldValue) {
-        Field field = getField(object.getClass(), fieldName);
-        boolean accessible = field.isAccessible();
-        try {
-            field.setAccessible(true);
-            field.set(object, fieldValue);
-        } catch (IllegalAccessException e) {
-            String message = String.format("Field[%s] can not be set with value[%s]", fieldName, fieldValue);
-            throw new IllegalArgumentException(message, e);
-        } finally {
-            if (field != null) {
-                field.setAccessible(accessible);
-            }
-        }
-    }
-
-    // /**
-    // * ·½·¨Ç©Ãû
-    // */
-    // private static class MethodSignature {
-    // final private Class<?> targetClass;
-    // final private String methodName;
-    // final private Class<?>[] argClasses;
-    //
-    // final private int hashCode;
-    //
-    // public MethodSignature(Class<?> targetClass, String methodName,
-    // Class<?>... argClasses) {
-    // this.targetClass = targetClass;
-    // this.methodName = methodName;
-    // this.argClasses = argClasses;
-    // this.hashCode = createHashCode();
-    // }
-    //
-    // private int createHashCode() {
-    // int result = 17;
-    // result = 37 * result + targetClass.hashCode();
-    // result = 37 * result + methodName.hashCode();
-    // if (argClasses != null) {
-    // for (int i = 0; i < argClasses.length; i++) {
-    // result = 37 * result + ((argClasses[i] == null) ? 0 :
-    // argClasses[i].hashCode());
-    // }
-    // }
-    // return result;
-    // }
-    //
-    // public boolean equals(Object o2) {
-    // if (this == o2) {
-    // return true;
-    // }
-    // MethodSignature that = (MethodSignature) o2;
-    // if (!(targetClass == that.targetClass)) {
-    // return false;
-    // }
-    // if (!(methodName.equals(that.methodName))) {
-    // return false;
-    // }
-    // if (argClasses.length != that.argClasses.length) {
-    // return false;
-    // }
-    // for (int i = 0; i < argClasses.length; i++) {
-    // if (!(argClasses[i] == that.argClasses[i])) {
-    // return false;
-    // }
-    // }
-    // return true;
-    // }
-    //
-    // public int hashCode() {
-    // return hashCode;
-    // }
-    // }
-
-    /**
-     * ÔÚÖ¸¶¨µÄÀàÖĞ»ñÈ¡·½·¨Ãû³ÆºÍ²ÎÊı¶ÔÓ¦µÄ·½·¨¶ÔÏó£¨Ã»ÓĞĞŞ¸Ä{@link Method#setAccessible(boolean) ¿É·ÃÎÊĞÔ}
-     * £©£¬Èç¹ûÃ»ÓĞÕÒµ½µÄ»°£¬·µ»Ø<code>null</code>
-     *
-     * @param classObject         Àà¶ÔÏó
-     * @param methodName          ·½·¨Ãû³Æ
-     * @param methodArgumentTypes ²ÎÊıÀàĞÍÁĞ±í
-     * @return Ö¸¶¨µÄÀàÖĞ»ñÈ¡·½·¨Ãû³ÆºÍ²ÎÊı¶ÔÓ¦µÄ·½·¨¶ÔÏó£¬Èç¹ûÃ»ÓĞÕÒµ½µÄ»°£¬·µ»Ø<code>null</code>
-     * @version 1.0.0
-     * @see Method
-     * @since 1.0.0 2012-1-5 ÏÂÎç01:36:46
-     */
-    public static Method getMethod(Class<?> classObject, String methodName, Class<?>... methodArgumentTypes) {
-        Method method = null;
-
-        try {
-            method = classObject.getDeclaredMethod(methodName, methodArgumentTypes);
-        } catch (Exception ignored) {
-            method = null;
-        }
-
-        return method;
-    }
-
-    private static Method findMethod(Class<?> type, String methodName, Object... arguments) {
-        List<Class<?>> methodArgumentTypesList = Lists.newArrayListWithCapacity(arguments.length);
-        for (Object argument : arguments) {
-            methodArgumentTypesList.add(argument.getClass());
-        }
-        Method method = findMethod(type, methodName, methodArgumentTypesList.toArray(new Class<?>[0]));
-        return method;
-    }
-
-    /**
-     * µ÷ÓÃ·Ç¾²Ì¬·½·¨
-     *
-     * @param <T>
-     * @param source     ¶ÔÏóÔ´
-     * @param methodName ·½·¨Ãû
-     * @param arguments  ·½·¨²ÎÊı
-     * @return ·µ»ØÖ´ĞĞ·½·¨ºóµÄ½á¹û
-     * @version 1.0.0
-     * @since 1.0.0 2012-1-5 ÏÂÎç02:15:26
-     */
-    public static <T> T invokeMethod(Object source, String methodName, Object... arguments) {
-
-        Class<?> type = source.getClass();
-
-        Method method = findMethod(type, methodName, arguments);
-
-        if (method == null)
-            return null;
-
-        return (T) invokeMethod(source, method, arguments);
-    }
-
-    /**
-     * µ÷ÓÃ¾²Ì¬·½·¨£¬Èç¹û·½·¨Ã»ÓĞÕÒµ½µÄ»°£¬·µ»Ø<code>null</code>
-     *
-     * @param <T>        ·µ»ØÀàĞÍ
-     * @param type       Ö¸¶¨µÄÀà
-     * @param methodName Ö¸¶¨µÄ·½·¨Ãû³Æ
-     * @param arguments  ·½·¨²ÎÊı¶ÔÏó
-     * @return ·µ»Ø·µ»ØÖµ¡£Èç¹û·½·¨Ã»ÓĞÕÒµ½µÄ»°£¬·µ»Ø<code>null</code>
-     * @version 1.0.0
-     * @since 1.0.0 2012-3-15 ÏÂÎç02:19:52
-     */
-    public static <T> T invokeStaticMethod(Class<?> type, String methodName, Object... arguments) {
-        Method method = findMethod(type, methodName, arguments);
-        if (method == null)
-            return null;
-        return (T) invokeMethod(null, method, arguments);
-    }
-
-    /**
-     * ·½·¨µ÷ÓÃ
-     *
-     * @param source
-     * @param method
-     * @param arguments
-     * @return ·½·¨·µ»ØÖµ
-     * @throws IllegalArgumentException °ü×°{@link Method#invoke(Object, Object...)}·½·¨Òì³£ĞÅÏ¢
-     * @version 1.0.0
-     * @see Method#invoke(Object, Object...)
-     * @since 1.0.0 2012-3-15 ÏÂÎç02:03:12
-     */
-    private static Object invokeMethod(Object source, Method method, Object... arguments) throws IllegalArgumentException {
-        final boolean accessible = method.isAccessible();
-        Object value = null;
-        try {
-            method.setAccessible(true);
-            value = method.invoke(source, arguments);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        } finally {
-            method.setAccessible(accessible);
-        }
-        return value;
-    }
-
-    /**
-     * ÔÚÖ¸¶¨µÄÀàÖĞ²éÕÒ·½·¨Ãû³ÆºÍ²ÎÊı¶ÔÓ¦µÄ·½·¨¶ÔÏó£¨Ã»ÓĞĞŞ¸Ä{@link Method#setAccessible(boolean) ¿É·ÃÎÊĞÔ}
-     * £©£¬Èç¹ûÃ»ÓĞÕÒµ½µÄ»°£¬µİ¹éµØ³¢ÊÔÆä¸¸Àà»ò²éÕÒ¡£Èç¹û»¹ÊÇÃ»ÓĞµÄ»°£¬·µ»Ø<code>null</code>
-     *
-     * @param classObject         Àà¶ÔÏó
-     * @param methodName          ·½·¨Ãû³Æ
-     * @param methodArgumentTypes ²ÎÊıÀàĞÍÁĞ±í
-     * @return ÔÚÖ¸¶¨µÄÀàÖĞ²éÕÒ·½·¨Ãû³ÆºÍ²ÎÊı¶ÔÓ¦µÄ·½·¨¶ÔÏó£¨Ã»ÓĞĞŞ¸Ä{@link Method#setAccessible(boolean)
-     * ¿É·ÃÎÊĞÔ} £©£¬Èç¹ûÃ»ÓĞÕÒµ½µÄ»°£¬µİ¹éµØ³¢ÊÔÆä¸¸Àà»ò²éÕÒ¡£Èç¹û»¹ÊÇÃ»ÓĞµÄ»°£¬·µ»Ø<code>null</code>
-     * @version 1.0.0
-     * @see Method
-     * @since 1.0.0 2012-1-5 ÏÂÎç01:36:46
-     */
-    public static Method findMethod(Class<?> classObject, String methodName, Class<?>... methodArgumentTypes) {
-        Method method = null;
-
-        Class<?> classToFind = classObject;
-
-        while (classToFind != null) {
-            try {
-                method = classToFind.getDeclaredMethod(methodName, methodArgumentTypes);
-            } catch (Exception ignored) {
-                method = null;
-                classToFind = classToFind.getSuperclass();
-            }
-
-            if (method != null)
-                break;
-
-        }
-
-        return method;
-    }
 
 }
