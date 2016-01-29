@@ -1,0 +1,33 @@
+/**
+ * AliExpress.com. Copyright (c) 2010-2015 All Rights Reserved.
+ */
+package org.confucius.commons.util.os.windows;
+
+import junit.framework.TestCase;
+import org.apache.commons.lang3.SystemUtils;
+import org.junit.Test;
+
+/**
+ * {@link WindowsRegistry} {@link Test}
+ *
+ * @author <a href="mailto:taogu.mxx@alibaba-inc.com">Mercy<a/>
+ * @version 1.0.0
+ * @see WindowsRegistry
+ * @since 1.0.0
+ */
+public class WindowsRegistryTest extends TestCase {
+
+    @Test
+    public void testInit() {
+        if (SystemUtils.IS_OS_WINDOWS) {
+            WindowsRegistry user = WindowsRegistry.currentUser();
+            String key = "\\Software\\Microsoft\\Windows\\CurrentVersion\\Run";
+            String name = "ABC";
+            String value = "value.exe";
+            user.set(key, name, value);
+            user.flush(key);
+            assertEquals(value, user.get(key, name));
+            user.remove(key, name);
+        }
+    }
+}

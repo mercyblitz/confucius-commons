@@ -41,6 +41,7 @@
     <modules>
         <module>confucius-commons-parent</module>
         <module>confucius-commons-lang</module>
+        <module>confucius-commons-util</module>
     </modules>
 
     <properties>

@@ -1,0 +1,27 @@
+/**
+ * AliExpress.com. Copyright (c) 2010-2015 All Rights Reserved.
+ */
+package org.confucius.commons.lang.constants;
+
+/**
+ * File Suffix Constants
+ *
+ * @author <a href="mailto:taogu.mxx@alibaba-inc.com">Mercy<a/>
+ * @version 1.0.0
+ * @see FileSuffixConstants
+ * @since 1.0.0
+ */
+public interface FileSuffixConstants {
+
+    /**
+     * Jar File suffix : ".jar"
+     */
+    String JAR = Constants.DOT + ProtocolConstants.JAR;
+
+    /**
+     * Class File suffix : ".class"
+     *
+     * @since 1.0.0
+     */
+    String CLASS = Constants.DOT + Constants.CLASS;
+}

@@ -18,7 +18,6 @@
 
     <properties>
         <java.version>1.6</java.version>
-        <commons.lang.version>1.0.0-SNAPSHOT</commons.lang.version>
 
         <apache.commons.lang3.version>3.4</apache.commons.lang3.version>
         <apache.commons.io.version>2.4</apache.commons.io.version>
