@@ -3,7 +3,7 @@ package org.confucius.commons.lang.process;
 import junit.framework.TestCase;
 
 /**
- * {@link ProcessExecutorTest}
+ * {@link ProcessExecutor} Test
  *
  * @author <a href="mailto:mercyblitz@gmail.com">Mercy<a/>
  * @version 1.0.0
@@ -13,7 +13,7 @@ import junit.framework.TestCase;
 public class ProcessExecutorTest extends TestCase {
 
     public void testExecute2() throws Exception {
-        ProcessExecutor executor = new ProcessExecutor("java");
+        ProcessExecutor executor = new ProcessExecutor("java","-version");
         executor.execute(System.out, 2000);
     }
 

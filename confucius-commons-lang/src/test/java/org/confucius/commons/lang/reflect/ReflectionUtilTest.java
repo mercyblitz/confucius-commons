@@ -1,4 +1,4 @@
-package org.confucius.commons.lang;
+package org.confucius.commons.lang.reflect;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;

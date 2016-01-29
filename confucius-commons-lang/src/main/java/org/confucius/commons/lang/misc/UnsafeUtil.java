@@ -2,7 +2,7 @@ package org.confucius.commons.lang.misc;
 
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.confucius.commons.lang.ReflectionUtil;
+import org.confucius.commons.lang.reflect.ReflectionUtil;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
@@ -10,8 +10,8 @@ import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import java.util.concurrent.ConcurrentMap;
 
-import static org.confucius.commons.lang.ReflectionUtil.assertArrayIndex;
-import static org.confucius.commons.lang.ReflectionUtil.assertFieldMatchType;
+import static org.confucius.commons.lang.reflect.ReflectionUtil.assertArrayIndex;
+import static org.confucius.commons.lang.reflect.ReflectionUtil.assertFieldMatchType;
 
 /**
  * {@link sun.misc.Unsafe} Utility class <p/> <b> Take case to  use those utility methods in order to the stability fo

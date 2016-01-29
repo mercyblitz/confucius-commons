@@ -1,4 +1,4 @@
-package org.confucius.commons.lang;
+package org.confucius.commons.lang.reflect;
 
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -125,7 +125,7 @@ public abstract class ReflectionUtil {
     }
 
     /**
-     * 获取指定层次的调用Class name
+     * Get Caller Class name
      *
      * @param invocationFrame
      *         invocation frame
