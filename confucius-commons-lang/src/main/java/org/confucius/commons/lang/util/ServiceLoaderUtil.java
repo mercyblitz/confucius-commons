@@ -1,4 +1,4 @@
-package org.confucius.commons.lang;
+package org.confucius.commons.lang.util;
 
 import com.google.common.collect.Lists;
 
@@ -16,9 +16,6 @@ import java.util.ServiceLoader;
  * @since 1.0.0
  */
 public abstract class ServiceLoaderUtil {
-
-    private ServiceLoaderUtil() {
-    }
 
     /**
      * 利用{@link ClassLoader}的层次性， 各层次的ClassLoader（ ClassLoader 、其双亲ClassLoader以及更上层）将会能加载其class

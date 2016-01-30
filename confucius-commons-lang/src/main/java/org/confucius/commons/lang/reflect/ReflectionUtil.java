@@ -107,11 +107,6 @@ public abstract class ReflectionUtil {
         stackTraceElementInvocationFrame = invocationFrame + 2;
     }
 
-
-    private ReflectionUtil() {
-
-    }
-
     /**
      * Get Caller class
      *

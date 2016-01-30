@@ -1,10 +1,9 @@
 /**
  * AliExpress.com. Copyright (c) 2010-2015 All Rights Reserved.
  */
-package org.confucius.commons.util;
+package org.confucius.commons.lang.util;
 
 import junit.framework.Assert;
-import junit.framework.TestCase;
 import org.junit.Test;
 
 import java.util.ResourceBundle;
@@ -12,18 +11,19 @@ import java.util.ResourceBundle;
 /**
  * {@link PropertyResourceBundleUtil} {@link Test}
  *
- * @author <a href="mailto:taogu.mxx@alibaba-inc.com">Mercy<a/>
+ * @author <a href="mailto:mercyblitz@gmail.com">Mercy<a/>
  * @version 1.0.0
  * @see PropertyResourceBundleUtilTest
  * @since 1.0.0
  */
-public class PropertyResourceBundleUtilTest extends TestCase {
+public class PropertyResourceBundleUtilTest {
 
     @Test
     public void testGetBundle() {
-        ResourceBundle resourceBundle = PropertyResourceBundleUtil.getBundle("META-INF.test");
+        ResourceBundle resourceBundle = PropertyResourceBundleUtil.getBundle("META-INF.test", "UTF-8");
         String expected = "测试名称";
         String value = resourceBundle.getString("name");
         Assert.assertEquals(expected, value);
     }
+
 }

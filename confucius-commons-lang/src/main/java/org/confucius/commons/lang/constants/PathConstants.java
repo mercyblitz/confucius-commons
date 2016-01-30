@@ -6,7 +6,7 @@ package org.confucius.commons.lang.constants;
 /**
  * Path Constants Definition
  *
- * @author <a href="mailto:taogu.mxx@alibaba-inc.com">Mercy<a/>
+ * @author <a href="mailto:mercyblitz@gmail.com">Mercy<a/>
  * @version 1.0.0
  * @see PathConstants
  * @since 1.0.0

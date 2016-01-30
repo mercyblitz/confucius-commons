@@ -3,19 +3,19 @@
  */
 package org.confucius.commons.util.os.windows;
 
-import junit.framework.TestCase;
+import junit.framework.Assert;
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.Test;
 
 /**
  * {@link WindowsRegistry} {@link Test}
  *
- * @author <a href="mailto:taogu.mxx@alibaba-inc.com">Mercy<a/>
+ * @author <a href="mailto:mercyblitz@gmail.com">Mercy<a/>
  * @version 1.0.0
  * @see WindowsRegistry
  * @since 1.0.0
  */
-public class WindowsRegistryTest extends TestCase {
+public class WindowsRegistryTest {
 
     @Test
     public void testInit() {
@@ -26,7 +26,7 @@ public class WindowsRegistryTest extends TestCase {
             String value = "value.exe";
             user.set(key, name, value);
             user.flush(key);
-            assertEquals(value, user.get(key, name));
+            Assert.assertEquals(value, user.get(key, name));
             user.remove(key, name);
         }
     }

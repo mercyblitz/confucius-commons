@@ -8,7 +8,7 @@ package org.confucius.commons.util.filter;
  *
  * @param <T>
  *         the type of Filtered object
- * @author <a href="mailto:taogu.mxx@alibaba-inc.com">Mercy<a/>
+ * @author <a href="mailto:mercyblitz@gmail.com">Mercy<a/>
  * @version 1.0.0
  * @see Filter
  * @since 1.0.0

@@ -15,7 +15,7 @@ import java.util.Set;
  *         the type of scanned source
  * @param <R>
  *         the type of scan result
- * @author <a href="mailto:taogu.mxx@alibaba-inc.com">Mercy<a/>
+ * @author <a href="mailto:mercyblitz@gmail.com">Mercy<a/>
  * @version 1.0.0
  * @see Scanner
  * @since 1.0.0

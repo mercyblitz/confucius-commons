@@ -1,7 +1,7 @@
 /**
  * AliExpress.com. Copyright (c) 2010-2015 All Rights Reserved.
  */
-package org.confucius.commons.util;
+package org.confucius.commons.lang.util;
 
 import org.apache.commons.lang3.SystemUtils;
 
@@ -13,7 +13,7 @@ import java.util.ResourceBundle;
 /**
  * {@link PropertyResourceBundle} Utility class
  *
- * @author <a href="mailto:taogu.mxx@alibaba-inc.com">Mercy<a/>
+ * @author <a href="mailto:mercyblitz@gmail.com">Mercy<a/>
  * @version 1.0.0
  * @see PropertyResourceBundle
  * @since 1.0.0

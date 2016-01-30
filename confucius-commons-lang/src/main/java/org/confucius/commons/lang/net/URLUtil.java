@@ -6,7 +6,10 @@ package org.confucius.commons.lang.net;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
+import org.confucius.commons.lang.constants.Constants;
 import org.confucius.commons.lang.constants.PathConstants;
+import org.confucius.commons.lang.constants.ProtocolConstants;
+import org.confucius.commons.lang.constants.SeparatorConstants;
 
 import javax.annotation.Nonnull;
 import java.net.URL;
@@ -19,7 +22,7 @@ import java.util.Map;
 /**
  * {@link URL} Utility class
  *
- * @author <a href="mailto:taogu.mxx@alibaba-inc.com">Mercy<a/>
+ * @author <a href="mailto:mercyblitz@gmail.com">Mercy<a/>
  * @version 1.0.0
  * @see URL
  * @see URLEncoder
@@ -34,28 +37,45 @@ public abstract class URLUtil {
      */
     private static final String DEFAULT_ENCODING = "UTF-8";
 
-
-    private URLUtil() {
-
+    /**
+     * Resolve Relative path from Jar File URL
+     *
+     * @param jarFileURL
+     *         Jar File URL
+     * @return Relative path in jar
+     * @throws NullPointerException
+     *         <code>jarFileURL</code> is <code>null</code>
+     * @version 1.0.0
+     * @since 1.0.0
+     */
+    public static String resolveRelativePath(URL jarFileURL) throws NullPointerException {
+        // NPE check
+        final String protocol = jarFileURL.getProtocol();
+        if (ProtocolConstants.FILE.equals(protocol) || ProtocolConstants.JAR.equals(protocol)) {
+            String form = jarFileURL.toExternalForm();
+            String relativePath = StringUtils.substringAfterLast(form, SeparatorConstants.JAR_ENTITY);
+            return decode(relativePath);
+        }
+        return null;
     }
 
 
     /**
-     * Resolve parameters {@link Map} from specified URL，The parameter name as key ，parameter value as key
+     * Resolve parameters {@link Map} from specified URL，The parameter name as key ，parameter value list as key
      *
      * @param url
      *         URL
-     * @return Read-only {@link Map}
+     * @return Non-null and Read-only {@link Map} , the order of parameters is determined by query string
      */
     @Nonnull
     public static Map<String, List<String>> resolveParametersMap(String url) {
-        String queryString = StringUtils.substringAfterLast(url, "?");
+        String queryString = StringUtils.substringAfterLast(url, SeparatorConstants.QUERY_STRING);
         if (StringUtils.isNotBlank(queryString)) {
-            Map<String, List<String>> parametersMap = Maps.newHashMap();
-            String[] queryParams = StringUtils.split(queryString, "&");
+            Map<String, List<String>> parametersMap = Maps.newLinkedHashMap();
+            String[] queryParams = StringUtils.split(queryString, Constants.AND);
             if (queryParams != null) {
                 for (String queryParam : queryParams) {
-                    String[] paramNameAndValue = StringUtils.split(queryParam, "=");
+                    String[] paramNameAndValue = StringUtils.split(queryParam, Constants.EQUAL);
                     if (paramNameAndValue.length > 0) {
                         String paramName = paramNameAndValue[0];
                         String paramValue = paramNameAndValue.length > 1 ? paramNameAndValue[1] : StringUtils.EMPTY;

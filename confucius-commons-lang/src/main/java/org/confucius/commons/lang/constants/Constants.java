@@ -6,7 +6,7 @@ package org.confucius.commons.lang.constants;
 /**
  * {@link Constants}
  *
- * @author <a href="mailto:taogu.mxx@alibaba-inc.com">Mercy<a/>
+ * @author <a href="mailto:mercyblitz@gmail.com">Mercy<a/>
  * @version 1.0.0
  * @see Constants
  * @since 1.0.0
@@ -22,4 +22,14 @@ public interface Constants {
      * Class : "class"
      */
     String CLASS = "class";
+
+    /**
+     * And : "&"
+     */
+    String AND = "&";
+
+    /**
+     * Equal : "="
+     */
+    String EQUAL = "=";
 }

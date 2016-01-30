@@ -142,10 +142,6 @@ public abstract class UnsafeUtil {
         }
     }
 
-    private UnsafeUtil() {
-
-    }
-
     /**
      * 计算数组Index Offset
      *

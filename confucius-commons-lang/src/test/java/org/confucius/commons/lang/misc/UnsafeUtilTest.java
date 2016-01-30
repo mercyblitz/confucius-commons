@@ -12,7 +12,7 @@ import sun.misc.Unsafe;
  * @see UnsafeUtilTest
  * @since 1.0.0 2016-01-28
  */
-public class UnsafeUtilTest extends TestCase {
+public class UnsafeUtilTest {
 
 
     private Model model;

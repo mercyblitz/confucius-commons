@@ -1,7 +1,7 @@
-package org.confucius.commons.lang;
+package org.confucius.commons.lang.util;
 
 import junit.framework.Assert;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.Set;
@@ -14,8 +14,9 @@ import java.util.Set;
  * @see ServiceLoaderUtilTest
  * @since 1.0.0 2016-01-28
  */
-public class ServiceLoaderUtilTest extends TestCase {
+public class ServiceLoaderUtilTest {
 
+    @Test
     public void testLoadServicesList() throws Exception {
 
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -32,7 +33,7 @@ public class ServiceLoaderUtilTest extends TestCase {
         Assert.assertEquals(firstService, lastService);
 
         String string = charSequence.toString();
-        assertTrue(string.isEmpty());
+        Assert.assertTrue(string.isEmpty());
 
         IllegalArgumentException e = null;
 
@@ -43,7 +44,7 @@ public class ServiceLoaderUtilTest extends TestCase {
             e.printStackTrace();
         }
 
-        assertNotNull(e);
+        Assert.assertNotNull(e);
 
     }
 }

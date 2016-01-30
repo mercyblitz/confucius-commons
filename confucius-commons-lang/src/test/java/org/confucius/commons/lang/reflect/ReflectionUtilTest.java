@@ -2,6 +2,7 @@ package org.confucius.commons.lang.reflect;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.lang.reflect.Array;
 
@@ -13,8 +14,9 @@ import java.lang.reflect.Array;
  * @see ReflectionUtilTest
  * @since 1.0.0 2016-01-28
  */
-public class ReflectionUtilTest extends TestCase {
+public class ReflectionUtilTest {
 
+    @Test
     public void testAssertArrayIndex() {
         int size = 10;
         Object array = Array.newInstance(int.class, size);
@@ -35,6 +37,7 @@ public class ReflectionUtilTest extends TestCase {
         }
     }
 
+    @Test
     public void testAssertArrayTypeOnException() {
         IllegalArgumentException exception = null;
         try {
@@ -46,6 +49,7 @@ public class ReflectionUtilTest extends TestCase {
         Assert.assertNotNull(exception);
     }
 
+    @Test
     public void testAssertArrayType() {
         testAssertArrayType(long.class);
         testAssertArrayType(int.class);
@@ -64,6 +68,7 @@ public class ReflectionUtilTest extends TestCase {
         ReflectionUtil.assertArrayType(array);
     }
 
+    @Test
     public void testGetCallerClassX() throws Exception {
         Class<?> expectedClass = ReflectionUtilTest.class;
 
@@ -77,6 +82,7 @@ public class ReflectionUtilTest extends TestCase {
 
     }
 
+    @Test
     public void testGetCallerClassName() {
         String expectedClassName = ReflectionUtilTest.class.getName();
         String callerClassName = ReflectionUtil.getCallerClassName();
@@ -88,6 +94,7 @@ public class ReflectionUtilTest extends TestCase {
         Assert.assertEquals(callerClassNameInGeneralJVM, callerClassName);
     }
 
+    @Test
     public void testGetCallerPackage() {
         Class<?> expectedClass = ReflectionUtilTest.class;
         Package expectedPackage = expectedClass.getPackage();
@@ -95,6 +102,7 @@ public class ReflectionUtilTest extends TestCase {
         Assert.assertEquals(expectedPackage, ReflectionUtil.getCallerPackage());
     }
 
+    @Test
     public void testGetCallerClassNamePerformance() {
 
         for (int i = 0; i < 6; i++) {

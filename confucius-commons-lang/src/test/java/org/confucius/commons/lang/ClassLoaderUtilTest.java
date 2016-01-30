@@ -4,17 +4,18 @@
 package org.confucius.commons.lang;
 
 import junit.framework.Assert;
-import junit.framework.TestCase;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.lang.management.ClassLoadingMXBean;
 import java.net.URL;
+import java.util.Map;
 import java.util.Set;
 
 /**
- * {@link ClassLoaderUtil} {@link TestCase}
+ * {@link ClassLoaderUtil} {@link Test}
  *
- * @author <a href="mailto:taogu.mxx@alibaba-inc.com">Mercy<a/>
+ * @author <a href="mailto:mercyblitz@gmail.com">Mercy<a/>
  * @version 1.0.0
  * @see ClassLoaderUtil
  * @since 1.0.0
@@ -84,6 +85,99 @@ public class ClassLoaderUtilTest extends AbstractTestCase {
         Assert.assertNotNull(resourceURLs);
         Assert.assertEquals(1, resourceURLs.size());
         echo(resourceURLs);
+    }
+
+    @Test
+    public void testClassLoadingMXBean() {
+        ClassLoadingMXBean classLoadingMXBean = ClassLoaderUtil.classLoadingMXBean;
+        Assert.assertEquals(classLoadingMXBean.getTotalLoadedClassCount(), ClassLoaderUtil.getTotalLoadedClassCount());
+        Assert.assertEquals(classLoadingMXBean.getLoadedClassCount(), ClassLoaderUtil.getLoadedClassCount());
+        Assert.assertEquals(classLoadingMXBean.getUnloadedClassCount(), ClassLoaderUtil.getUnloadedClassCount());
+        Assert.assertEquals(classLoadingMXBean.isVerbose(), ClassLoaderUtil.isVerbose());
+
+        ClassLoaderUtil.setVerbose(true);
+        Assert.assertTrue(ClassLoaderUtil.isVerbose());
+    }
+
+    @Test
+    public void testGetInheritableClassLoaders() {
+        Set<ClassLoader> classLoaders = ClassLoaderUtil.getInheritableClassLoaders(classLoader);
+        Assert.assertNotNull(classLoaders);
+        Assert.assertTrue(classLoaders.size() > 1);
+        echo(classLoaders);
+    }
+
+    @Test
+    public void testGetLoadedClasses() {
+        Set<Class<?>> classesSet = ClassLoaderUtil.getLoadedClasses(classLoader);
+        Assert.assertNotNull(classesSet);
+        Assert.assertFalse(classesSet.isEmpty());
+
+
+        classesSet = ClassLoaderUtil.getLoadedClasses(ClassLoader.getSystemClassLoader());
+        Assert.assertNotNull(classesSet);
+        Assert.assertFalse(classesSet.isEmpty());
+        echo(classesSet);
+    }
+
+    @Test
+    public void testGetAllLoadedClasses() {
+        Set<Class<?>> classesSet = ClassLoaderUtil.getAllLoadedClasses(classLoader);
+        Assert.assertNotNull(classesSet);
+        Assert.assertFalse(classesSet.isEmpty());
+
+
+        classesSet = ClassLoaderUtil.getAllLoadedClasses(ClassLoader.getSystemClassLoader());
+        Assert.assertNotNull(classesSet);
+        Assert.assertFalse(classesSet.isEmpty());
+        echo(classesSet);
+    }
+
+    @Test
+    public void testGetAllLoadedClassesMap() {
+        Map<ClassLoader, Set<Class<?>>> allLoadedClassesMap = ClassLoaderUtil.getAllLoadedClassesMap(classLoader);
+        Assert.assertNotNull(allLoadedClassesMap);
+        Assert.assertFalse(allLoadedClassesMap.isEmpty());
+    }
+
+    @Test
+    public void testFindLoadedClass() {
+
+        Class<?> type = null;
+        for (Class<?> class_ : ClassLoaderUtil.getAllLoadedClasses(classLoader)) {
+            type = ClassLoaderUtil.findLoadedClass(classLoader, class_.getName());
+            Assert.assertEquals(class_, type);
+        }
+
+        type = ClassLoaderUtil.findLoadedClass(classLoader, String.class.getName());
+        Assert.assertEquals(String.class, type);
+
+        long startTime = System.currentTimeMillis();
+        int times = 1000 * 1000;
+        for (int i = 0; i < times; i++) {
+            type = ClassLoaderUtil.findLoadedClass(classLoader, String.class.getName());
+        }
+        long costTime = System.currentTimeMillis() - startTime;
+        String message = String.format("%s times invocation of ClassLoaderUtil.findLoadedClass takes %s ms", times, costTime);
+        echo(message);
+        Assert.assertEquals(String.class, type);
+    }
+
+
+    @Test
+    public void testGetLoadedBootstrapClasses() {
+        Set<Class<?>> loadedBootstrapClasses = ClassLoaderUtil.getLoadedBootstrapClasses();
+
+        Set<Class<?>> classesSet = ClassLoaderUtil.getAllLoadedClasses(classLoader);
+
+        Assert.assertEquals(loadedBootstrapClasses, classesSet);
+
+        int loadedClassesSize = loadedBootstrapClasses.size() + classesSet.size();
+
+        int loadedClassCount = ClassLoaderUtil.getLoadedClassCount();
+
+        echo(loadedClassesSize);
+        echo(loadedClassCount);
     }
 
 }

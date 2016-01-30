@@ -9,7 +9,7 @@ import java.util.jar.JarEntry;
 /**
  * {@link JarEntry#getName()}  JarEntry Name} {@link Comparator}
  *
- * @author <a href="mailto:taogu.mxx@alibaba-inc.com">Mercy<a/>
+ * @author <a href="mailto:mercyblitz@gmail.com">Mercy<a/>
  * @version 1.0.0
  * @see JarEntryNameComparator
  * @since 1.0.0
