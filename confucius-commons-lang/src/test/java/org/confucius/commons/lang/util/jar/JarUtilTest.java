@@ -1,5 +1,5 @@
 /**
- * AliExpress.com. Copyright (c) 2010-2015 All Rights Reserved.
+ *
  */
 package org.confucius.commons.lang.util.jar;
 
@@ -41,10 +41,6 @@ public class JarUtilTest {
         File rtJarFile = new File(SystemUtils.JAVA_HOME, "/lib/rt.jar");
         Assert.assertNotNull(jarAbsolutePath);
         Assert.assertEquals(rtJarFile.getAbsolutePath(), jarAbsolutePath);
-
-        URL url = new URL("http://www.google.com");
-        jarAbsolutePath = JarUtil.resolveJarAbsolutePath(url);
-        Assert.assertNull(jarAbsolutePath);
     }
 
 
@@ -55,9 +51,11 @@ public class JarUtilTest {
         JarFile rtJarFile = new JarFile(new File(SystemUtils.JAVA_HOME, "/lib/rt.jar"));
         Assert.assertNotNull(jarFile);
         Assert.assertEquals(rtJarFile.getName(), jarFile.getName());
+    }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testToJarFileOnException() throws Exception {
         URL url = new URL("http://www.google.com");
-        jarFile = JarUtil.toJarFile(url);
-        Assert.assertNull(jarFile);
+        JarFile jarFile = JarUtil.toJarFile(url);
     }
 }

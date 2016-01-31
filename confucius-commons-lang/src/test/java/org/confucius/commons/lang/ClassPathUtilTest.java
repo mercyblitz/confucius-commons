@@ -1,11 +1,12 @@
 /**
- * AliExpress.com. Copyright (c) 2010-2015 All Rights Reserved.
+ *
  */
 package org.confucius.commons.lang;
 
 import junit.framework.Assert;
 import org.junit.Test;
 
+import java.net.URL;
 import java.util.Set;
 
 /**
@@ -33,5 +34,35 @@ public class ClassPathUtilTest extends AbstractTestCase {
         Assert.assertNotNull(classPaths);
         Assert.assertFalse(classPaths.isEmpty());
         echo(classPaths);
+    }
+
+    @Test
+    public void getRuntimeClassLocation() {
+        URL location = null;
+        location = ClassPathUtil.getRuntimeClassLocation(String.class);
+        Assert.assertNotNull(location);
+        echo(location);
+
+        location = ClassPathUtil.getRuntimeClassLocation(getClass());
+        Assert.assertNotNull(location);
+        echo(location);
+
+        //Primitive type
+        location = ClassPathUtil.getRuntimeClassLocation(int.class);
+        Assert.assertNull(location);
+
+        //Array type
+        location = ClassPathUtil.getRuntimeClassLocation(int[].class);
+        Assert.assertNull(location);
+
+
+        Set<String> classNames = ClassLoaderUtil.getAllClassNamesInClassPath();
+        for (String className : classNames) {
+            if (!ClassLoaderUtil.isLoadedClass(classLoader, className)) {
+                location = ClassPathUtil.getRuntimeClassLocation(className);
+                Assert.assertNull(location);
+            }
+        }
+
     }
 }

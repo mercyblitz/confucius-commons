@@ -1,9 +1,10 @@
 /**
- * AliExpress.com. Copyright (c) 2010-2015 All Rights Reserved.
+ *
  */
 package org.confucius.commons.lang;
 
 import junit.framework.TestCase;
+import org.junit.Ignore;
 
 import java.util.Iterator;
 
@@ -15,7 +16,10 @@ import java.util.Iterator;
  * @see AbstractTestCase
  * @since 1.0.0
  */
+@Ignore
 public abstract class AbstractTestCase {
+
+    protected final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
     public void echo(Object object, Object... others) {
         echo(object);

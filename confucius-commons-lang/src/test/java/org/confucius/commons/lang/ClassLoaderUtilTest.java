@@ -1,14 +1,16 @@
 /**
- * AliExpress.com. Copyright (c) 2010-2015 All Rights Reserved.
+ *
  */
 package org.confucius.commons.lang;
 
+import com.google.common.collect.Sets;
 import junit.framework.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.lang.management.ClassLoadingMXBean;
 import java.net.URL;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
 
@@ -141,6 +143,19 @@ public class ClassLoaderUtilTest extends AbstractTestCase {
     }
 
     @Test
+    public void testGetAllClassNamesMapInClassPath() {
+        Map<String, Set<String>> allClassNamesMapInClassPath = ClassLoaderUtil.getAllClassNamesMapInClassPath();
+        Assert.assertFalse(allClassNamesMapInClassPath.isEmpty());
+    }
+
+    @Test
+    public void testGetAllClassNamesInClassPath() {
+        Set<String> allClassNames = ClassLoaderUtil.getAllClassNamesInClassPath();
+        Assert.assertFalse(allClassNames.isEmpty());
+    }
+
+
+    @Test
     public void testFindLoadedClass() {
 
         Class<?> type = null;
@@ -152,32 +167,69 @@ public class ClassLoaderUtilTest extends AbstractTestCase {
         type = ClassLoaderUtil.findLoadedClass(classLoader, String.class.getName());
         Assert.assertEquals(String.class, type);
 
-        long startTime = System.currentTimeMillis();
-        int times = 1000 * 1000;
-        for (int i = 0; i < times; i++) {
-            type = ClassLoaderUtil.findLoadedClass(classLoader, String.class.getName());
-        }
-        long costTime = System.currentTimeMillis() - startTime;
-        String message = String.format("%s times invocation of ClassLoaderUtil.findLoadedClass takes %s ms", times, costTime);
-        echo(message);
-        Assert.assertEquals(String.class, type);
+        type = ClassLoaderUtil.findLoadedClass(classLoader, Double.class.getName());
+        Assert.assertEquals(Double.class, type);
+    }
+
+    @Test
+    public void testIsLoadedClass() {
+        Assert.assertTrue(ClassLoaderUtil.isLoadedClass(classLoader, String.class));
+        Assert.assertTrue(ClassLoaderUtil.isLoadedClass(classLoader, Double.class));
+        Assert.assertTrue(ClassLoaderUtil.isLoadedClass(classLoader, Double.class.getName()));
     }
 
 
     @Test
-    public void testGetLoadedBootstrapClasses() {
-        Set<Class<?>> loadedBootstrapClasses = ClassLoaderUtil.getLoadedBootstrapClasses();
+    public void testFindLoadedClassesInClassPath() {
+        Double d = null;
+        Set<Class<?>> allLoadedClasses = ClassLoaderUtil.findLoadedClassesInClassPath(classLoader);
 
         Set<Class<?>> classesSet = ClassLoaderUtil.getAllLoadedClasses(classLoader);
 
-        Assert.assertEquals(loadedBootstrapClasses, classesSet);
+        Set<Class<?>> remainingClasses = Sets.newLinkedHashSet(allLoadedClasses);
 
-        int loadedClassesSize = loadedBootstrapClasses.size() + classesSet.size();
+        remainingClasses.addAll(classesSet);
+
+        Set<Class<?>> sortedClasses = Sets.newTreeSet(new ClassComparator());
+        sortedClasses.addAll(remainingClasses);
+
+        echo(sortedClasses);
+
+        int loadedClassesSize = allLoadedClasses.size() + classesSet.size();
 
         int loadedClassCount = ClassLoaderUtil.getLoadedClassCount();
 
         echo(loadedClassesSize);
         echo(loadedClassCount);
+    }
+
+    @Test
+    public void testGetCount() {
+        long count = ClassLoaderUtil.getTotalLoadedClassCount();
+        Assert.assertTrue(count > 0);
+
+        count = ClassLoaderUtil.getLoadedClassCount();
+        Assert.assertTrue(count > 0);
+
+        count = ClassLoaderUtil.getUnloadedClassCount();
+        Assert.assertTrue(count > -1);
+    }
+
+    @Test
+    public void testFindLoadedClassesInClassPaths() {
+        Set<Class<?>> allLoadedClasses = ClassLoaderUtil.findLoadedClassesInClassPaths(classLoader, ClassPathUtil.getClassPaths());
+        Assert.assertFalse(allLoadedClasses.isEmpty());
+    }
+
+
+    private static class ClassComparator implements Comparator<Class<?>> {
+
+        @Override
+        public int compare(Class<?> o1, Class<?> o2) {
+            String cn1 = o1.getName();
+            String cn2 = o2.getName();
+            return cn1.compareTo(cn2);
+        }
     }
 
 }

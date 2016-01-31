@@ -1,5 +1,5 @@
 /**
- * AliExpress.com. Copyright (c) 2010-2015 All Rights Reserved.
+ *
  */
 package org.confucius.commons.util.comparator;
 

@@ -8,5 +8,8 @@ package org.confucius.commons.performance;
  * @see PerformanceAction
  * @since 1.0.0 2016-01-31
  */
-public interface PerformanceAction {
+public interface PerformanceAction<T> {
+
+    T execute();
+
 }

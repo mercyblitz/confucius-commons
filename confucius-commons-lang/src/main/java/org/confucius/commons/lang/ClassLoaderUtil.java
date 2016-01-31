@@ -1,5 +1,5 @@
 /**
- * AliExpress.com. Copyright (c) 2010-2015 All Rights Reserved.
+ *
  */
 package org.confucius.commons.lang;
 
@@ -26,7 +26,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.management.ClassLoadingMXBean;
 import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Collections;
@@ -48,9 +47,19 @@ public abstract class ClassLoaderUtil {
 
     protected static final ClassLoadingMXBean classLoadingMXBean = ManagementFactory.getClassLoadingMXBean();
 
-    protected static final RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
-
     private static final Method findLoadedClassMethod = initFindLoadedClassMethod();
+
+    private static final Map<String, Set<String>> allClassNamesMapInClassPath = initClassNamesMapInClassPath();
+
+    private static Map<String, Set<String>> initClassNamesMapInClassPath() {
+        Map<String, Set<String>> classNamesMap = Maps.newLinkedHashMap();
+        Set<String> classPaths = ClassPathUtil.getClassPaths();
+        for (String classPath : classPaths) {
+            Set<String> classNames = findClassNames(classPath);
+            classNamesMap.put(classPath, classNames);
+        }
+        return Collections.unmodifiableMap(classNamesMap);
+    }
 
     /**
      * Initializes {@link Method} for {@link ClassLoader#findLoadedClass(String)}
@@ -73,6 +82,31 @@ public abstract class ClassLoaderUtil {
         String message = String.format("Current JVM[ Implementation : %s , Version : %s ] does not supported ! " +
                 "Stack Trace : %s", SystemUtils.JAVA_VENDOR, SystemUtils.JAVA_VERSION, stackTrace);
         throw new UnsupportedOperationException(message);
+    }
+
+    /**
+     * The map of all class names in {@link ClassPathUtil#getClassPaths() class path} , the class path for one {@link
+     * JarFile} or classes directory as key , the class names set as value
+     *
+     * @return Read-only
+     */
+    @Nonnull
+    public static Map<String, Set<String>> getAllClassNamesMapInClassPath() {
+        return allClassNamesMapInClassPath;
+    }
+
+    /**
+     * The set of all class names in {@link ClassPathUtil#getClassPaths() class path}
+     *
+     * @return Read-only
+     */
+    @Nonnull
+    public static Set<String> getAllClassNamesInClassPath() {
+        Set<String> allClassNames = Sets.newLinkedHashSet();
+        for (Set<String> classNames : allClassNamesMapInClassPath.values()) {
+            allClassNames.addAll(classNames);
+        }
+        return Collections.unmodifiableSet(allClassNames);
     }
 
 
@@ -130,7 +164,53 @@ public abstract class ClassLoaderUtil {
     }
 
     /**
-     * Find Loaded {@link Class} under specified {@link ClassLoader}
+     * Find Loaded {@link Class} under specified inheritable {@link ClassLoader} and class names
+     *
+     * @param classLoader
+     *         {@link ClassLoader}
+     * @param classNames
+     *         class names set
+     * @return {@link Class} if loaded , or <code>null</code>
+     */
+    public static Set<Class<?>> findLoadedClasses(ClassLoader classLoader, Set<String> classNames) {
+        Set<Class<?>> loadedClasses = Sets.newLinkedHashSet();
+        for (String className : classNames) {
+            Class<?> class_ = findLoadedClass(classLoader, className);
+            if (class_ != null) {
+                loadedClasses.add(class_);
+            }
+        }
+        return Collections.unmodifiableSet(loadedClasses);
+    }
+
+    /**
+     * Check specified {@link Class} is loaded on specified inheritable {@link ClassLoader}
+     *
+     * @param classLoader
+     *         {@link ClassLoader}
+     * @param type
+     *         {@link Class}
+     * @return If Loaded , return <code>true</code> , or <code>false</code>
+     */
+    public static boolean isLoadedClass(ClassLoader classLoader, Class<?> type) {
+        return isLoadedClass(classLoader, type.getName());
+    }
+
+    /**
+     * Check specified {@link Class#getName() class name}  is loaded on specified inheritable {@link ClassLoader}
+     *
+     * @param classLoader
+     *         {@link ClassLoader}
+     * @param className
+     *         {@link Class#getName() class name}
+     * @return If Loaded , return <code>true</code> , or <code>false</code>
+     */
+    public static boolean isLoadedClass(ClassLoader classLoader, String className) {
+        return findLoadedClass(classLoader, className) != null;
+    }
+
+    /**
+     * Find Loaded {@link Class} under specified inheritable {@link ClassLoader}
      *
      * @param classLoader
      *         {@link ClassLoader}
@@ -372,63 +452,92 @@ public abstract class ClassLoaderUtil {
     }
 
     /**
-     * Get loaded classes {@link Set} for bootstrap
+     * Find loaded classes {@link Set} in class path
      *
+     * @param classLoader
+     *         {@link ClassLoader}
      * @return Read-only {@link Set}
      * @throws UnsupportedOperationException
      *         If JVM does not support
      */
-    public static Set<Class<?>> getLoadedBootstrapClasses() throws UnsupportedOperationException {
-        Set<String> bootstrapClassPaths = ClassPathUtil.getBootstrapClassPaths();
-        return Collections.unmodifiableSet(getLoadedClasses(bootstrapClassPaths));
+    public static Set<Class<?>> findLoadedClassesInClassPath(ClassLoader classLoader) throws UnsupportedOperationException {
+        Set<String> classNames = getAllClassNamesInClassPath();
+        return findLoadedClasses(classLoader, classNames);
     }
 
-    protected static Set<Class<?>> getLoadedClasses(Set<String> bootstrapClassPaths) throws UnsupportedOperationException {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+    /**
+     * Find loaded classes {@link Set} in class paths {@link Set}
+     *
+     * @param classLoader
+     *         {@link ClassLoader}
+     * @param classPaths
+     *         the class paths for the {@link Set} of {@link JarFile} or classes directory
+     * @return Read-only {@link Set}
+     * @throws UnsupportedOperationException
+     *         If JVM does not support
+     * @see #findLoadedClass(ClassLoader, String)
+     */
+    public static Set<Class<?>> findLoadedClassesInClassPaths(ClassLoader classLoader, Set<String> classPaths) throws UnsupportedOperationException {
         Set<Class<?>> loadedClasses = Sets.newLinkedHashSet();
-        for (String bootstrapClassPath : bootstrapClassPaths) {
-            loadedClasses.addAll(getLoadedClasses(classLoader, bootstrapClassPath));
+        for (String classPath : classPaths) {
+            loadedClasses.addAll(findLoadedClassesInClassPath(classLoader, classPath));
         }
         return loadedClasses;
     }
 
-    protected static Set<Class<?>> getLoadedClasses(ClassLoader classLoader, String bootstrapClassPath) throws UnsupportedOperationException {
-        Set<Class<?>> loadedClasses = Collections.emptySet();
-        File classesFileHolder = new File(bootstrapClassPath); // JarFile or Directory
+    /**
+     * Find loaded classes {@link Set} in class path
+     *
+     * @param classLoader
+     *         {@link ClassLoader}
+     * @param classPath
+     *         the class path for one {@link JarFile} or classes directory
+     * @return Read-only {@link Set}
+     * @throws UnsupportedOperationException
+     *         If JVM does not support
+     * @see #findLoadedClass(ClassLoader, String)
+     */
+    public static Set<Class<?>> findLoadedClassesInClassPath(ClassLoader classLoader, String classPath) throws UnsupportedOperationException {
+        Set<String> classNames = allClassNamesMapInClassPath.get(classPath);
+        if (classNames == null) {
+            classNames = findClassNames(classPath);
+        }
+        return findLoadedClasses(classLoader, classNames);
+    }
+
+    protected static Set<String> findClassNames(String classPath) {
+        File classesFileHolder = new File(classPath); // JarFile or Directory
         if (classesFileHolder.isDirectory()) { //Directory
-            return getLoadedClassesFromDirectory(classLoader, classesFileHolder);
-        } else if (classesFileHolder.isFile() && bootstrapClassPath.endsWith(FileSuffixConstants.JAR)) { //JarFile
-            return getLoadedClassesFromJarFile(classLoader, classesFileHolder);
+            return findClassNamesFromDirectory(classesFileHolder);
+        } else if (classesFileHolder.isFile() && classPath.endsWith(FileSuffixConstants.JAR)) { //JarFile
+            return findClassNamesFromJarFile(classesFileHolder);
         }
-        return loadedClasses;
+        return Collections.emptySet();
     }
 
-    protected static Set<Class<?>> getLoadedClassesFromDirectory(ClassLoader classLoader, File classesDirectory) throws UnsupportedOperationException {
-        Set<Class<?>> loadedClasses = Sets.newLinkedHashSet();
+
+    protected static Set<String> findClassNamesFromDirectory(File classesDirectory) {
+        Set<String> classNames = Sets.newLinkedHashSet();
         SimpleFileScanner simpleFileScanner = SimpleFileScanner.INSTANCE;
         Set<File> classFiles = simpleFileScanner.scan(classesDirectory, true, new SuffixFileFilter(FileSuffixConstants.CLASS));
         for (File classFile : classFiles) {
             String className = resolveClassName(classesDirectory, classFile);
-            Class<?> class_ = findLoadedClass(classLoader, className);
-            if (class_ != null) {
-                loadedClasses.add(class_);
-            }
+            classNames.add(className);
         }
-        return loadedClasses;
+        return classNames;
     }
 
-
-    protected static Set<Class<?>> getLoadedClassesFromJarFile(ClassLoader classLoader, File jarFile) throws UnsupportedOperationException {
+    protected static Set<String> findClassNamesFromJarFile(File jarFile) {
         if (!jarFile.exists()) {
             return Collections.emptySet();
         }
 
-        Set<Class<?>> loadedClasses = Sets.newLinkedHashSet();
-        Set<JarEntry> jarEntries = Sets.newLinkedHashSet();
+        Set<String> classNames = Sets.newLinkedHashSet();
+
         SimpleJarEntryScanner simpleJarEntryScanner = SimpleJarEntryScanner.INSTANCE;
         try {
             JarFile jarFile_ = new JarFile(jarFile);
-            jarEntries = simpleJarEntryScanner.scan(jarFile_, true, new JarUtil.JarEntryFilter() {
+            Set<JarEntry> jarEntries = simpleJarEntryScanner.scan(jarFile_, true, new JarUtil.JarEntryFilter() {
                 @Override
                 public boolean accept(JarEntry jarEntry) {
                     return jarEntry.getName().endsWith(FileSuffixConstants.CLASS);
@@ -438,9 +547,8 @@ public abstract class ClassLoaderUtil {
             for (JarEntry jarEntry : jarEntries) {
                 String jarEntryName = jarEntry.getName();
                 String className = resolveClassName(jarEntryName);
-                Class<?> class_ = findLoadedClass(classLoader, className);
-                if (class_ != null) {
-                    loadedClasses.add(class_);
+                if (StringUtils.isNotBlank(className)) {
+                    classNames.add(className);
                 }
             }
 
@@ -448,7 +556,7 @@ public abstract class ClassLoaderUtil {
 
         }
 
-        return loadedClasses;
+        return classNames;
     }
 
 
