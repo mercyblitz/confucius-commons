@@ -57,12 +57,6 @@
         <dependencies>
 
             <dependency>
-                <groupId>com.aliexpress.commons</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>${commons.lang.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
                 <version>${jsr305.version}</version>
