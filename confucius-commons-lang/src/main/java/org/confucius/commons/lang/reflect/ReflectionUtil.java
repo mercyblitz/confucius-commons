@@ -1,14 +1,16 @@
 package org.confucius.commons.lang.reflect;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Reflection Utility class , generic methods are defined from {@link FieldUtils} , {@link MethodUtils} , {@link
@@ -368,6 +370,81 @@ public abstract class ReflectionUtil {
         }
     }
 
+
+    /**
+     * Convert {@link Array} object to {@link List}
+     *
+     * @param array
+     *         array object
+     * @return {@link List}
+     * @throws IllegalArgumentException
+     *         if the object argument is not an array
+     */
+    @Nonnull
+    public static <T> List<T> toList(Object array) throws IllegalArgumentException {
+        int length = Array.getLength(array);
+        List<T> list = Lists.newArrayListWithCapacity(length);
+        for (int i = 0; i < length; i++) {
+            Object element = Array.get(array, i);
+            list.add((T) toObject(element));
+        }
+        return list;
+    }
+
+    private static Object toObject(Object object) {
+        if (object == null) {
+            return object;
+        }
+        Class<?> type = object.getClass();
+        if (type.isArray()) {
+            return toList(object);
+        } else {
+            return object;
+        }
+    }
+
+
+    /**
+     * Read fields value as {@link Map}
+     *
+     * @param object
+     *         object to be read
+     * @return fields value as {@link Map}
+     */
+    @Nonnull
+    public static Map<String, Object> readFieldsAsMap(Object object) {
+        Map<String, Object> fieldsAsMap = Maps.newLinkedHashMap();
+        Class<?> type = object.getClass();
+        Field[] fields = type.getDeclaredFields();
+        for (Field field : fields) {
+
+            if (Modifier.isStatic(field.getModifiers())) { // To filter static fields
+                continue;
+            }
+
+            field.setAccessible(true);
+
+            try {
+                String fieldName = field.getName();
+                Object fieldValue = field.get(object);
+                if (fieldValue != null) {
+                    Class<?> fieldValueType = fieldValue.getClass();
+                    if (ClassUtils.isPrimitiveOrWrapper(fieldValueType)) {
+                    } else if (fieldValueType.isArray()) {
+                        fieldValue = toList(fieldValue);
+                    } else if ("java.lang".equals(fieldValueType.getPackage().getName())) {
+
+                    } else {
+                        fieldValue = readFieldsAsMap(fieldValue);
+                    }
+                }
+                fieldsAsMap.put(fieldName, fieldValue);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return fieldsAsMap;
+    }
 
 
 }

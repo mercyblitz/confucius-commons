@@ -6,6 +6,7 @@ package org.confucius.commons.lang.io.scanner;
 import junit.framework.Assert;
 import org.confucius.commons.lang.AbstractTestCase;
 import org.confucius.commons.lang.ClassLoaderUtil;
+import org.confucius.commons.lang.filter.JarEntryFilter;
 import org.confucius.commons.lang.util.jar.JarUtil;
 import org.junit.Test;
 
@@ -40,7 +41,7 @@ public class SimpleJarEntryScannerTest extends AbstractTestCase {
         Assert.assertTrue(jarEntrySet.size() > 1000);
 
 
-        jarEntrySet = simpleJarEntryScanner.scan(jarFile, true, new JarUtil.JarEntryFilter() {
+        jarEntrySet = simpleJarEntryScanner.scan(jarFile, true, new JarEntryFilter() {
             @Override
             public boolean accept(JarEntry jarEntry) {
                 return jarEntry.getName().equals("java/lang/String.class");

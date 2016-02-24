@@ -5,6 +5,8 @@ package org.confucius.commons.lang.io.scanner;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
+import org.confucius.commons.lang.constants.PathConstants;
+import org.confucius.commons.lang.filter.JarEntryFilter;
 import org.confucius.commons.lang.util.jar.JarUtil;
 
 import javax.annotation.Nonnull;
@@ -50,7 +52,7 @@ public class SimpleJarEntryScanner {
      */
     @Nonnull
     public Set<JarEntry> scan(URL jarURL, final boolean recursive) throws NullPointerException, IllegalArgumentException, IOException {
-        return this.scan(jarURL, recursive, null);
+        return scan(jarURL, recursive, null);
     }
 
     /**
@@ -59,7 +61,7 @@ public class SimpleJarEntryScanner {
      * @param recursive
      *         recursive
      * @param jarEntryFilter
-     *         {@link JarUtil.JarEntryFilter}
+     *         {@link JarEntryFilter}
      * @return Read-only {@link Set}
      * @throws NullPointerException
      *         If argument <code>null</code>
@@ -67,11 +69,11 @@ public class SimpleJarEntryScanner {
      *         {@link JarUtil#resolveJarAbsolutePath(URL)}
      * @throws IOException
      *         {@link JarUtil#toJarFile(URL)}
-     * @see JarUtil.JarEntryFilter
+     * @see JarEntryFilter
      * @since 1.0.0
      */
     @Nonnull
-    public Set<JarEntry> scan(URL jarURL, final boolean recursive, JarUtil.JarEntryFilter jarEntryFilter) throws NullPointerException, IllegalArgumentException, IOException {
+    public Set<JarEntry> scan(URL jarURL, final boolean recursive, JarEntryFilter jarEntryFilter) throws NullPointerException, IllegalArgumentException, IOException {
         String relativePath = JarUtil.resolveRelativePath(jarURL);
         JarFile jarFile = JarUtil.toJarFile(jarURL);
         return scan(jarFile, relativePath, recursive, jarEntryFilter);
@@ -99,11 +101,11 @@ public class SimpleJarEntryScanner {
      * @throws IllegalArgumentException
      * @throws IOException
      */
-    public Set<JarEntry> scan(JarFile jarFile, final boolean recursive, JarUtil.JarEntryFilter jarEntryFilter) throws NullPointerException, IllegalArgumentException, IOException {
+    public Set<JarEntry> scan(JarFile jarFile, final boolean recursive, JarEntryFilter jarEntryFilter) throws NullPointerException, IllegalArgumentException, IOException {
         return scan(jarFile, StringUtils.EMPTY, recursive, jarEntryFilter);
     }
 
-    protected Set<JarEntry> scan(JarFile jarFile, String relativePath, final boolean recursive, JarUtil.JarEntryFilter jarEntryFilter) throws NullPointerException, IllegalArgumentException, IOException {
+    protected Set<JarEntry> scan(JarFile jarFile, String relativePath, final boolean recursive, JarEntryFilter jarEntryFilter) throws NullPointerException, IllegalArgumentException, IOException {
         Set<JarEntry> jarEntriesSet = Sets.newLinkedHashSet();
         List<JarEntry> jarEntriesList = JarUtil.filter(jarFile, jarEntryFilter);
 
@@ -119,7 +121,7 @@ public class SimpleJarEntryScanner {
                 } else {
                     int beginIndex = jarEntryName.indexOf(relativePath);
                     if (beginIndex == 0) {
-                        accept = jarEntryName.indexOf("/", relativePath.length()) < 0;
+                        accept = jarEntryName.indexOf(PathConstants.SLASH, relativePath.length()) < 0;
                     }
                 }
             }

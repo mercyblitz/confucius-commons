@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.confucius.commons.lang.constants.FileSuffixConstants;
 import org.confucius.commons.lang.constants.PathConstants;
 import org.confucius.commons.lang.constants.ProtocolConstants;
+import org.confucius.commons.lang.filter.JarEntryFilter;
 import org.confucius.commons.lang.net.URLUtil;
 
 import javax.annotation.Nonnull;
@@ -139,20 +140,5 @@ public class JarUtil {
         return Collections.unmodifiableList(jarEntriesList);
     }
 
-    /**
-     * {@link JarEntry} Filter
-     */
-    public static interface JarEntryFilter {
 
-        /**
-         * Is accepted to {@link JarEntry}？
-         *
-         * @param jarEntry
-         *         JarEntry
-         * @return If accepted, return <code>true</code> , or <code>false</code>
-         * @version 1.0.0
-         * @since 1.0.0
-         */
-        boolean accept(JarEntry jarEntry);
-    }
 }

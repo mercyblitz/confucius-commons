@@ -5,12 +5,19 @@ package org.confucius.commons.lang;
 
 import com.google.common.collect.Sets;
 import junit.framework.Assert;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.confucius.commons.lang.constants.FileSuffixConstants;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.lang.management.ClassLoadingMXBean;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,6 +34,28 @@ public class ClassLoaderUtilTest extends AbstractTestCase {
     private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
     @Test
+    public void testFields() throws Exception {
+
+
+        List<Field> allFields = FieldUtils.getAllFieldsList(ClassLoader.class);
+
+//        echo(ToStringBuilder.reflectionToString(classLoader,ToStringStyle.MULTI_LINE_STYLE));
+        Set<ClassLoader> classLoaders = ClassLoaderUtil.getInheritableClassLoaders(classLoader);
+        for (ClassLoader classLoader : classLoaders) {
+            echo(String.format("ClassLoader : %s", classLoader));
+            for (Field field : allFields) {
+                if (!Modifier.isStatic(field.getModifiers())) {
+                    field.setAccessible(true);
+                    String message = String.format("Field name : %s , value : %s", field.getName(), ToStringBuilder.reflectionToString(field.get(classLoader), ToStringStyle.NO_CLASS_NAME_STYLE));
+                    echo(message);
+                }
+            }
+        }
+
+    }
+
+
+    @Test
     public void testResolve() {
         String resourceName = "META-INF/abc/def";
         String expectedResourceName = "META-INF/abc/def";
@@ -37,10 +66,15 @@ public class ClassLoaderUtilTest extends AbstractTestCase {
         resolvedResourceName = ClassLoaderUtil.ResourceType.DEFAULT.resolve(resourceName);
         Assert.assertEquals(expectedResourceName, resolvedResourceName);
 
-        resourceName = "java.lang.String";
+        resourceName = "java.lang.String.class";
 
         expectedResourceName = "java/lang/String.class";
         resolvedResourceName = ClassLoaderUtil.ResourceType.CLASS.resolve(resourceName);
+        Assert.assertEquals(expectedResourceName, resolvedResourceName);
+
+        resourceName = "java.lang";
+        expectedResourceName = "java/lang/";
+        resolvedResourceName = ClassLoaderUtil.ResourceType.PACKAGE.resolve(resourceName);
         Assert.assertEquals(expectedResourceName, resolvedResourceName);
 
     }
@@ -58,7 +92,7 @@ public class ClassLoaderUtilTest extends AbstractTestCase {
 
     @Test
     public void testGetResource() {
-        URL resourceURL = ClassLoaderUtil.getResource(classLoader, ClassLoaderUtilTest.class.getName());
+        URL resourceURL = ClassLoaderUtil.getResource(classLoader, ClassLoaderUtilTest.class.getName() + FileSuffixConstants.CLASS);
         Assert.assertNotNull(resourceURL);
         echo(resourceURL);
 
@@ -73,7 +107,7 @@ public class ClassLoaderUtilTest extends AbstractTestCase {
 
     @Test
     public void testGetResources() throws IOException {
-        Set<URL> resourceURLs = ClassLoaderUtil.getResources(classLoader, ClassLoaderUtilTest.class.getName());
+        Set<URL> resourceURLs = ClassLoaderUtil.getResources(classLoader, ClassLoaderUtilTest.class.getName() + FileSuffixConstants.CLASS);
         Assert.assertNotNull(resourceURLs);
         Assert.assertEquals(1, resourceURLs.size());
         echo(resourceURLs);
@@ -142,17 +176,7 @@ public class ClassLoaderUtilTest extends AbstractTestCase {
         Assert.assertFalse(allLoadedClassesMap.isEmpty());
     }
 
-    @Test
-    public void testGetAllClassNamesMapInClassPath() {
-        Map<String, Set<String>> allClassNamesMapInClassPath = ClassLoaderUtil.getAllClassNamesMapInClassPath();
-        Assert.assertFalse(allClassNamesMapInClassPath.isEmpty());
-    }
 
-    @Test
-    public void testGetAllClassNamesInClassPath() {
-        Set<String> allClassNames = ClassLoaderUtil.getAllClassNamesInClassPath();
-        Assert.assertFalse(allClassNames.isEmpty());
-    }
 
 
     @Test

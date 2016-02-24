@@ -56,7 +56,7 @@ public class ClassPathUtilTest extends AbstractTestCase {
         Assert.assertNull(location);
 
 
-        Set<String> classNames = ClassLoaderUtil.getAllClassNamesInClassPath();
+        Set<String> classNames = ClassUtil.getAllClassNamesInClassPaths();
         for (String className : classNames) {
             if (!ClassLoaderUtil.isLoadedClass(classLoader, className)) {
                 location = ClassPathUtil.getRuntimeClassLocation(className);

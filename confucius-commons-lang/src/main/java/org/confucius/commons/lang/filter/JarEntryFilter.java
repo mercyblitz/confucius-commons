@@ -1,7 +1,7 @@
 /**
  *
  */
-package org.confucius.commons.util.filter;
+package org.confucius.commons.lang.filter;
 
 import java.util.jar.JarEntry;
 

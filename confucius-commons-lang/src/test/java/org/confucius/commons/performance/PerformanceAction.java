@@ -3,7 +3,7 @@ package org.confucius.commons.performance;
 /**
  * {@link PerformanceAction}
  *
- * @author <a href="mailto:taogu.mxx@alibaba-inc.com">Mercy<a/>
+ * @author <a href="mercyblitz@gmail.com">Mercy<a/>
  * @version 1.0.0
  * @see PerformanceAction
  * @since 1.0.0 2016-01-31

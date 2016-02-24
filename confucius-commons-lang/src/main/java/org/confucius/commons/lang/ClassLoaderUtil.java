@@ -7,7 +7,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.EnumerationUtils;
-import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -15,24 +14,16 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.confucius.commons.lang.constants.Constants;
 import org.confucius.commons.lang.constants.FileSuffixConstants;
 import org.confucius.commons.lang.constants.PathConstants;
-import org.confucius.commons.lang.io.FileUtil;
-import org.confucius.commons.lang.io.scanner.SimpleFileScanner;
-import org.confucius.commons.lang.io.scanner.SimpleJarEntryScanner;
 import org.confucius.commons.lang.net.URLUtil;
-import org.confucius.commons.lang.util.jar.JarUtil;
 
 import javax.annotation.Nonnull;
-import java.io.File;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.management.ClassLoadingMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.jar.JarEntry;
+import java.util.*;
 import java.util.jar.JarFile;
 
 /**
@@ -49,17 +40,6 @@ public abstract class ClassLoaderUtil {
 
     private static final Method findLoadedClassMethod = initFindLoadedClassMethod();
 
-    private static final Map<String, Set<String>> allClassNamesMapInClassPath = initClassNamesMapInClassPath();
-
-    private static Map<String, Set<String>> initClassNamesMapInClassPath() {
-        Map<String, Set<String>> classNamesMap = Maps.newLinkedHashMap();
-        Set<String> classPaths = ClassPathUtil.getClassPaths();
-        for (String classPath : classPaths) {
-            Set<String> classNames = findClassNames(classPath);
-            classNamesMap.put(classPath, classNames);
-        }
-        return Collections.unmodifiableMap(classNamesMap);
-    }
 
     /**
      * Initializes {@link Method} for {@link ClassLoader#findLoadedClass(String)}
@@ -82,31 +62,6 @@ public abstract class ClassLoaderUtil {
         String message = String.format("Current JVM[ Implementation : %s , Version : %s ] does not supported ! " +
                 "Stack Trace : %s", SystemUtils.JAVA_VENDOR, SystemUtils.JAVA_VERSION, stackTrace);
         throw new UnsupportedOperationException(message);
-    }
-
-    /**
-     * The map of all class names in {@link ClassPathUtil#getClassPaths() class path} , the class path for one {@link
-     * JarFile} or classes directory as key , the class names set as value
-     *
-     * @return Read-only
-     */
-    @Nonnull
-    public static Map<String, Set<String>> getAllClassNamesMapInClassPath() {
-        return allClassNamesMapInClassPath;
-    }
-
-    /**
-     * The set of all class names in {@link ClassPathUtil#getClassPaths() class path}
-     *
-     * @return Read-only
-     */
-    @Nonnull
-    public static Set<String> getAllClassNamesInClassPath() {
-        Set<String> allClassNames = Sets.newLinkedHashSet();
-        for (Set<String> classNames : allClassNamesMapInClassPath.values()) {
-            allClassNames.addAll(classNames);
-        }
-        return Collections.unmodifiableSet(allClassNames);
     }
 
 
@@ -234,6 +189,24 @@ public abstract class ClassLoaderUtil {
     }
 
     /**
+     * Loaded specified class name under {@link ClassLoader}
+     *
+     * @param classLoader
+     *         {@link ClassLoader}
+     * @param className
+     *         the name of {@link Class}
+     * @return {@link Class} if can be loaded
+     */
+    @Nullable
+    public static Class<?> loadClass(@Nonnull ClassLoader classLoader, @Nonnull String className) {
+        try {
+            return classLoader.loadClass(className);
+        } catch (Throwable ignored) {
+        }
+        return null;
+    }
+
+    /**
      * Get the resource URLs Set under specified resource name and type
      *
      * @param classLoader
@@ -252,7 +225,8 @@ public abstract class ClassLoaderUtil {
      */
     public static Set<URL> getResources(ClassLoader classLoader, ResourceType resourceType, String resourceName) throws NullPointerException, IOException {
         String normalizedResourceName = resourceType.resolve(resourceName);
-        return Sets.newLinkedHashSet(EnumerationUtils.toList(classLoader.getResources(normalizedResourceName)));
+        Enumeration<URL> resources = classLoader.getResources(normalizedResourceName);
+        return resources != null && resources.hasMoreElements() ? Sets.newLinkedHashSet(EnumerationUtils.toList(resources)) : Collections.<URL>emptySet();
     }
 
     /**
@@ -342,7 +316,8 @@ public abstract class ClassLoaderUtil {
      * @since 1.0.0
      */
     public static URL getClassResource(ClassLoader classLoader, String className) {
-        return getResource(classLoader, ResourceType.CLASS, className);
+        final String resourceName = className + FileSuffixConstants.CLASS;
+        return getResource(classLoader, ResourceType.CLASS, resourceName);
     }
 
     /**
@@ -461,7 +436,7 @@ public abstract class ClassLoaderUtil {
      *         If JVM does not support
      */
     public static Set<Class<?>> findLoadedClassesInClassPath(ClassLoader classLoader) throws UnsupportedOperationException {
-        Set<String> classNames = getAllClassNamesInClassPath();
+        Set<String> classNames = ClassUtil.getAllClassNamesInClassPaths();
         return findLoadedClasses(classLoader, classNames);
     }
 
@@ -498,78 +473,10 @@ public abstract class ClassLoaderUtil {
      * @see #findLoadedClass(ClassLoader, String)
      */
     public static Set<Class<?>> findLoadedClassesInClassPath(ClassLoader classLoader, String classPath) throws UnsupportedOperationException {
-        Set<String> classNames = allClassNamesMapInClassPath.get(classPath);
-        if (classNames == null) {
-            classNames = findClassNames(classPath);
-        }
+        Set<String> classNames = ClassUtil.getClassNamesInClassPath(classPath, true);
         return findLoadedClasses(classLoader, classNames);
     }
 
-    protected static Set<String> findClassNames(String classPath) {
-        File classesFileHolder = new File(classPath); // JarFile or Directory
-        if (classesFileHolder.isDirectory()) { //Directory
-            return findClassNamesFromDirectory(classesFileHolder);
-        } else if (classesFileHolder.isFile() && classPath.endsWith(FileSuffixConstants.JAR)) { //JarFile
-            return findClassNamesFromJarFile(classesFileHolder);
-        }
-        return Collections.emptySet();
-    }
-
-
-    protected static Set<String> findClassNamesFromDirectory(File classesDirectory) {
-        Set<String> classNames = Sets.newLinkedHashSet();
-        SimpleFileScanner simpleFileScanner = SimpleFileScanner.INSTANCE;
-        Set<File> classFiles = simpleFileScanner.scan(classesDirectory, true, new SuffixFileFilter(FileSuffixConstants.CLASS));
-        for (File classFile : classFiles) {
-            String className = resolveClassName(classesDirectory, classFile);
-            classNames.add(className);
-        }
-        return classNames;
-    }
-
-    protected static Set<String> findClassNamesFromJarFile(File jarFile) {
-        if (!jarFile.exists()) {
-            return Collections.emptySet();
-        }
-
-        Set<String> classNames = Sets.newLinkedHashSet();
-
-        SimpleJarEntryScanner simpleJarEntryScanner = SimpleJarEntryScanner.INSTANCE;
-        try {
-            JarFile jarFile_ = new JarFile(jarFile);
-            Set<JarEntry> jarEntries = simpleJarEntryScanner.scan(jarFile_, true, new JarUtil.JarEntryFilter() {
-                @Override
-                public boolean accept(JarEntry jarEntry) {
-                    return jarEntry.getName().endsWith(FileSuffixConstants.CLASS);
-                }
-            });
-
-            for (JarEntry jarEntry : jarEntries) {
-                String jarEntryName = jarEntry.getName();
-                String className = resolveClassName(jarEntryName);
-                if (StringUtils.isNotBlank(className)) {
-                    classNames.add(className);
-                }
-            }
-
-        } catch (Exception e) {
-
-        }
-
-        return classNames;
-    }
-
-
-    protected static String resolveClassName(File classesDirectory, File classFile) {
-        String classFileRelativePath = FileUtil.resolveRelativePath(classesDirectory, classFile);
-        return resolveClassName(classFileRelativePath);
-    }
-
-    protected static String resolveClassName(String resourceName) {
-        String className = StringUtils.replace(resourceName, PathConstants.SLASH, Constants.DOT);
-        className = StringUtils.substringBefore(className, FileSuffixConstants.CLASS);
-        return className;
-    }
 
     /**
      * Resource Type
@@ -578,15 +485,45 @@ public abstract class ClassLoaderUtil {
 
         DEFAULT {
             @Override
+            boolean supported(String name) {
+                return true;
+            }
+
+            @Override
             public String normalize(String name) {
                 return name;
             }
+
+
         },
         CLASS {
             @Override
-            public String normalize(String name) {
-                return StringUtils.replace(name, Constants.DOT, PathConstants.SLASH) + FileSuffixConstants.CLASS;
+            boolean supported(String name) {
+                return StringUtils.endsWith(name, FileSuffixConstants.CLASS);
             }
+
+            @Override
+            public String normalize(String name) {
+                String className = StringUtils.replace(name, FileSuffixConstants.CLASS, StringUtils.EMPTY);
+                return StringUtils.replace(className, Constants.DOT, PathConstants.SLASH) + FileSuffixConstants.CLASS;
+            }
+
+
+        }, PACKAGE {
+            @Override
+            boolean supported(String name) {
+                //TODO: use regexp to match more precise
+                return !CLASS.supported(name)
+                        && !StringUtils.contains(name, PathConstants.SLASH)
+                        && !StringUtils.contains(name, PathConstants.BACK_SLASH);
+            }
+
+            @Override
+            String normalize(String name) {
+                return StringUtils.replace(name, Constants.DOT, PathConstants.SLASH) + PathConstants.SLASH;
+            }
+
+
         };
 
         /**
@@ -597,7 +534,7 @@ public abstract class ClassLoaderUtil {
          * @return a newly resolved resource name
          */
         public String resolve(String name) {
-            String normalizedName = normalize(name);
+            String normalizedName = supported(name) ? normalize(name) : null;
             if (normalizedName == null)
                 return normalizedName;
 
@@ -611,18 +548,26 @@ public abstract class ClassLoaderUtil {
             return normalizedName;
         }
 
+        /**
+         * Is supported specified resource name in current resource type
+         *
+         * @param name
+         *         resource name
+         * @return If supported , return <code>true</code> , or return <code>false</code>
+         */
+        abstract boolean supported(String name);
+
+        /**
+         * Normalizes resource name
+         *
+         * @param name
+         *         resource name
+         * @return normalized resource name
+         */
         abstract String normalize(String name);
+
+
     }
 
-    /**
-     * Class File {@link JarUtil.JarEntryFilter}
-     */
-    private static class ClassFileJarEntryFilter implements JarUtil.JarEntryFilter {
 
-        @Override
-        public boolean accept(JarEntry jarEntry) {
-            String jarEntryName = jarEntry.getName();
-            return StringUtils.endsWith(jarEntryName, FileSuffixConstants.CLASS);
-        }
-    }
 }

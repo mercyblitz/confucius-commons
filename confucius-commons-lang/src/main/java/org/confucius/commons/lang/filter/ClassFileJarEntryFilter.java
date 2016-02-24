@@ -1,7 +1,9 @@
 /**
  *
  */
-package org.confucius.commons.util.filter;
+package org.confucius.commons.lang.filter;
+
+import org.confucius.commons.lang.constants.FileSuffixConstants;
 
 import java.util.jar.JarEntry;
 
@@ -26,6 +28,6 @@ public class ClassFileJarEntryFilter implements JarEntryFilter {
 
     @Override
     public boolean accept(JarEntry jarEntry) {
-        return !jarEntry.isDirectory() && jarEntry.getName().endsWith(".class");
+        return !jarEntry.isDirectory() && jarEntry.getName().endsWith(FileSuffixConstants.CLASS);
     }
 }

@@ -1,10 +1,15 @@
 package org.confucius.commons.lang.reflect;
 
+import com.google.common.collect.Maps;
 import junit.framework.Assert;
 import junit.framework.TestCase;
+import org.confucius.commons.lang.AbstractTestCase;
 import org.junit.Test;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * {@link ReflectionUtil} {@link TestCase}
@@ -14,7 +19,7 @@ import java.lang.reflect.Array;
  * @see ReflectionUtilTest
  * @since 1.0.0 2016-01-28
  */
-public class ReflectionUtilTest {
+public class ReflectionUtilTest extends AbstractTestCase {
 
     @Test
     public void testAssertArrayIndex() {
@@ -129,5 +134,41 @@ public class ReflectionUtilTest {
         }
         long costTime = System.currentTimeMillis() - startTime;
         System.out.printf("It's cost to execute ReflectionUtil.getCallerClassNameInGeneralJVM() %d times : %d ms！\n", times, costTime);
+    }
+
+    @Test
+    public void testToList() {
+        int[] intArray = new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9};
+        List<Integer> list = ReflectionUtil.toList(intArray);
+        Object expectedList = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9);
+        Assert.assertEquals(expectedList, list);
+
+
+        int[][] intIntArray = new int[][]{{1, 2, 3}, {4, 5, 6,}, {7, 8, 9}};
+        list = ReflectionUtil.toList(intIntArray);
+        expectedList = Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6), Arrays.asList(7, 8, 9));
+        Assert.assertEquals(expectedList, list);
+    }
+
+    @Test
+    public void testReadFieldsAsMap() {
+        Map<String, Object> map = ReflectionUtil.readFieldsAsMap(new String("abc"));
+        echo(map);
+
+        map = ReflectionUtil.readFieldsAsMap(Arrays.asList(1, 2, 3, 4));
+        echo(map);
+
+        Map<String, String> value = Maps.newHashMapWithExpectedSize(3);
+        value.put("a", "a");
+        value.put("b", "b");
+        value.put("c", "c");
+        map = ReflectionUtil.readFieldsAsMap(value);
+        echo(map);
+
+        map = ReflectionUtil.readFieldsAsMap(String.class);
+        echo(map);
+
+        map = ReflectionUtil.readFieldsAsMap(Class.class);
+        echo(map);
     }
 }

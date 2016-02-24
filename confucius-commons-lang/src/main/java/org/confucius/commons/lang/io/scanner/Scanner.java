@@ -1,9 +1,10 @@
 /**
  *
  */
-package org.confucius.commons.util.scanner;
+package org.confucius.commons.lang.io.scanner;
 
-import org.confucius.commons.util.filter.Filter;
+
+import org.confucius.commons.lang.filter.Filter;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
@@ -28,9 +29,13 @@ public interface Scanner<S, R> {
      * @param source
      *         scanned source
      * @return result set , non-null
+     * @throws IllegalArgumentException
+     *         scanned source is not legal
+     * @throws IllegalStateException
+     *         scanned source's state is not valid
      */
     @Nonnull
-    Set<R> scan(S source);
+    Set<R> scan(S source) throws IllegalArgumentException, IllegalStateException;
 
     /**
      * Scan source to calculate result set with {@link Filter}
@@ -40,8 +45,12 @@ public interface Scanner<S, R> {
      * @param filter
      *         {@link Filter<R> filter} to accept result
      * @return result set , non-null
+     * @throws IllegalArgumentException
+     *         scanned source is not legal
+     * @throws IllegalStateException
+     *         scanned source's state is not valid
      */
     @Nonnull
-    Set<R> scan(S source, Filter<R> filter);
+    Set<R> scan(S source, Filter<R> filter) throws IllegalArgumentException, IllegalStateException;
 
 }

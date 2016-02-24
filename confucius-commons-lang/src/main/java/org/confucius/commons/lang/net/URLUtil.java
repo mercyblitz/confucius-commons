@@ -12,12 +12,15 @@ import org.confucius.commons.lang.constants.ProtocolConstants;
 import org.confucius.commons.lang.constants.SeparatorConstants;
 
 import javax.annotation.Nonnull;
+import java.io.File;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.jar.JarFile;
 
 /**
  * {@link URL} Utility class
@@ -174,7 +177,6 @@ public abstract class URLUtil {
         return decode(value, DEFAULT_ENCODING);
     }
 
-
     /**
      * Decodes a <code>application/x-www-form-urlencoded</code> string using a specific encoding scheme. The supplied
      * encoding is used to determine what characters are represented by any consecutive sequences of the form
@@ -200,6 +202,53 @@ public abstract class URLUtil {
             throw new IllegalArgumentException(e.getMessage());
         }
         return decodedValue;
+    }
+
+    /**
+     * Is directory URL?
+     *
+     * @param url
+     *         URL
+     * @return if directory , return <code>true</code>
+     */
+    public static boolean isDirectoryURL(URL url) {
+        String protocol = url.getProtocol();
+
+        boolean flag = false;
+        if (!ProtocolConstants.FILE.equals(protocol))
+            return flag;
+
+        try {
+            File classPathFile = new File(url.toURI());
+            flag = classPathFile.isDirectory();
+        } catch (URISyntaxException e) {
+            flag = false;
+        }
+
+        return flag;
+    }
+
+    /**
+     * Is Jar URL?
+     *
+     * @param url
+     *         URL
+     * @return If jar , return <code>true</code>
+     */
+    public static boolean isJarURL(URL url) {
+        String protocol = url.getProtocol();
+        boolean flag = false;
+        if (ProtocolConstants.FILE.equals(protocol)) {
+            try {
+                File file = new File(url.toURI());
+                JarFile jarFile = new JarFile(file);
+                flag = jarFile != null;
+            } catch (Exception e) {
+            }
+        } else if (ProtocolConstants.JAR.equals(protocol)) {
+            flag = true;
+        }
+        return flag;
     }
 
 }
