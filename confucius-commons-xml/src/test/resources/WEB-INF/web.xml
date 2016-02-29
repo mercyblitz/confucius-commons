@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+
+	<listener>
+		<listener-class>com.taobao.shopabtest.admin.servlet.listener.BootstrapServletContextListener</listener-class>
+	</listener>
+
+	<listener>
+		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+	</listener>
+
+	<listener>
+		<description>Log4jInitializator ServletContextListener实现</description>
+		<listener-class>com.taobao.shopabtest.client.servlet.listener.Log4jInitializatorServletContextListener</listener-class>
+	</listener>
+
+	<listener>
+		<description>Log4jMDC 配置ServletRequestListener实现</description>
+		<listener-class>com.taobao.shopabtest.client.servlet.listener.Log4jMDCConfigServletRequestListener</listener-class>
+	</listener>
+
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+	<listener>
+		<listener-class>com.taobao.shopabtest.admin.servlet.listener.ApplicationServersClusterInitializationServletContextListener</listener-class>
+	</listener>
+
+	<!-- <context-param> <description>Log4j XML配置文件位置的配置参数</description> <param-name>log4j.config.file.location</param-name>
+		<param-value>/WEB-INF/client-log4j.xml</param-value> </context-param> <context-param>
+		<description>Log4j 备份日志文件压缩时间间隔的配置参数</description> <param-name>log4j.backup.log.compress.time.interval</param-name> 
+		<param-value>30</param-value> </context-param> <context-param> <description>og4j
+		备份日志文件压缩时间单位的配置参数</description> <param-name>log4j.backup.log.compress.time.unit</param-name> 
+		<param-value>SECONDS</param-value> </context-param> <context-param> <description>Log4j
+		备份日志文件在压缩后是否被删除的配置参数</description> <param-name>log4j.delete.backup.log.after.compress</param-name> 
+		<param-value>true</param-value> </context-param> -->
+
+	<context-param>
+		<description>系统名称配置</description>
+		<param-name>shopabtest.app.name</param-name>
+		<param-value>shopabtest</param-value>
+	</context-param>
+
+
+	<context-param>
+		<description>Spring Log4J
+			配置路径参数,请参考org.springframework.web.util.Log4jWebConfigurer</description>
+		<param-name>log4jConfigLocation</param-name>
+		<param-value>/WEB-INF/log4j.xml</param-value>
+	</context-param>
+
+
+	<context-param>
+		<description>如果有多值的话，用","分隔它们</description>
+		<param-name>shopabtest.admin.host</param-name>
+		<param-value>shopabtest.admin.taobao.com</param-value>
+	</context-param>
+
+	<filter>
+		<description>请求Encoding处理</description>
+		<filter-name>CharacterEncodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+		<init-param>
+			<param-name>forceEncoding</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>CharacterEncodingFilter</filter-name>
+		<servlet-name>springMVC</servlet-name>
+	</filter-mapping>
+
+
+	<filter>
+		<description>静态资源过滤器</description>
+		<filter-name>StaticResourceResponseCharacterEncodingFilter</filter-name>
+		<filter-class>com.taobao.shopabtest.admin.servlet.filter.StaticResourceResponseCharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>response-character-encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</filter>
+
+	<filter-mapping>
+		<!-- 映射JS资源 -->
+		<filter-name>StaticResourceResponseCharacterEncodingFilter</filter-name>
+		<url-pattern>*.js</url-pattern>
+	</filter-mapping>
+
+	<!-- <filter> <description>灰度发布Filter</description> <filter-name>UserApplicationRouteFilter</filter-name> 
+		<filter-class>com.taobao.shopabtest.client.servlet.UserApplicationRouteFilter</filter-class> 
+		</filter> <filter-mapping> <filter-name>UserApplicationRouteFilter</filter-name> 
+		<servlet-name>springMVC</servlet-name> </filter-mapping> -->
+
+	<servlet>
+		<servlet-name>springMVC</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+
+	<!-- <servlet-mapping> <servlet-name>springMVC</servlet-name> <url-pattern>*.htm</url-pattern> 
+		</servlet-mapping> <servlet-mapping> <servlet-name>springMVC</servlet-name> 
+		<url-pattern>*.html</url-pattern> </servlet-mapping> <servlet-mapping> <servlet-name>springMVC</servlet-name> 
+		<url-pattern>*.xml</url-pattern> </servlet-mapping> -->
+
+	<servlet-mapping>
+		<servlet-name>springMVC</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<description>
+			ReleaseConfigDownloadServlet必须在org.springframework.web.servlet.DispatcherServlet之后被实例化
+		</description>
+		<servlet-name>ReleaseConfigDownloadServlet</servlet-name>
+		<servlet-class>com.taobao.shopabtest.admin.servlet.ReleaseConfigDownloadServlet</servlet-class>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>ReleaseConfigDownloadServlet</servlet-name>
+		<url-pattern>/shopabtest/release/config/load/from/admin</url-pattern>
+	</servlet-mapping>
+
+	<context-param>
+		<param-name>loggingRoot</param-name>
+		<param-value>${shopabtest.logging.root}</param-value>
+	</context-param>
+	<context-param>
+		<param-name>loggingLevel</param-name>
+		<param-value>error</param-value>
+	</context-param>
+	<context-param>
+		<param-name>loggingCharset</param-name>
+		<param-value>GBK</param-value>
+	</context-param>
+
+
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/springMVC-servlet.xml</param-value>
+	</context-param>
+
+	<jsp-config>
+		<jsp-property-group>
+			<url-pattern>*.jsp</url-pattern>
+			<page-encoding>GBK</page-encoding>
+			<include-prelude>/WEB-INF/jsp/prelude/header.jspf</include-prelude>
+			<include-prelude>/WEB-INF/jsp/prelude/include-taglibs.jspf</include-prelude>
+			<include-prelude>/WEB-INF/jsp/prelude/variables.jspf</include-prelude>
+			<include-prelude>/WEB-INF/jsp/prelude/include-css.jspf</include-prelude>
+			<include-prelude>/WEB-INF/jsp/prelude/include-jquery-js.jspf</include-prelude>
+		</jsp-property-group>
+	</jsp-config>
+
+	<mime-mapping>
+		<extension>atom</extension>
+		<mime-type>application/atom+xml</mime-type>
+	</mime-mapping>
+
+	<mime-mapping>
+		<extension>json</extension>
+		<mime-type>application/json</mime-type>
+	</mime-mapping>
+</web-app>
+

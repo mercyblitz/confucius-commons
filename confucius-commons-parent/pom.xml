@@ -27,6 +27,8 @@
         <slf4j.version>1.6.1</slf4j.version>
         <log4j.version>1.2.16</log4j.version>
         <guava.version>19.0.20150826</guava.version>
+        <servlet.version>2.4</servlet.version>
+        <jsp.version>2.0</jsp.version>
         <junit.version>4.7</junit.version>
     </properties>
 
@@ -104,17 +106,31 @@
                 <version>${guava.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>servlet-api</artifactId>
+                <version>${servlet.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>javax.servlet.jsp</groupId>
+                <artifactId>jsp-api</artifactId>
+                <version>${jsp.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
             <!-- Testing -->
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
+                <scope>test</scope>
             </dependency>
 
         </dependencies>
 
     </dependencyManagement>
-
 
 
 </project>

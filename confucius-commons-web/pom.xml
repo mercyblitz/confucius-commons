@@ -11,13 +11,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.confucius.commons</groupId>
-    <artifactId>confucius-commons-util</artifactId>
+    <artifactId>confucius-commons-web</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <name>Confucius Commons Util</name>
-    <description>Confucius Commons Util</description>
+    <name>Confucius Commons Web</name>
+    <description>Confucius Commons Web</description>
 
     <properties>
         <confucius.commons.lang.version>1.0.0-SNAPSHOT</confucius.commons.lang.version>
+        <xerces.version>2.6.2</xerces.version>
     </properties>
 
     <dependencies>
@@ -29,12 +30,19 @@
         </dependency>
 
         <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet.jsp</groupId>
+            <artifactId>jsp-api</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>test</scope>
         </dependency>
 
     </dependencies>
-
-
 </project>

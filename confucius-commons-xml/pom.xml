@@ -11,17 +11,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.confucius.commons</groupId>
-    <artifactId>confucius-commons-util</artifactId>
+    <artifactId>confucius-commons-xml</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <name>Confucius Commons Util</name>
-    <description>Confucius Commons Util</description>
+    <name>Confucius Commons XML</name>
+    <description>Confucius Commons XML</description>
 
     <properties>
         <confucius.commons.lang.version>1.0.0-SNAPSHOT</confucius.commons.lang.version>
+        <xerces.version>2.6.2</xerces.version>
     </properties>
 
     <dependencies>
-
         <dependency>
             <groupId>org.confucius.commons</groupId>
             <artifactId>confucius-commons-lang</artifactId>
@@ -29,12 +29,30 @@
         </dependency>
 
         <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>${xerces.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <version>4.7</version>
             <scope>test</scope>
         </dependency>
 
-    </dependencies>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>8.0.28</version>
+        </dependency>
 
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-logging-juli</artifactId>
+            <version>8.0.28</version>
+        </dependency>
+    </dependencies>
 
 </project>
