@@ -262,7 +262,7 @@ public class ServletRequestUtil {
      * @see HttpServletRequest
      * @since 1.0.0 2011-10-21
      */
-    public static <T> T getAttribute(HttpServletRequest request, String attributeName) {
+    public static <T> T getAttribute(ServletRequest request, String attributeName) {
         T value = (T) request.getAttribute(attributeName);
         return value;
     }
