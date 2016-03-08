@@ -219,8 +219,14 @@ public abstract class URLUtil {
             String protocol = url.getProtocol();
             try {
                 if (ProtocolConstants.JAR.equals(protocol)) {
-                    JarEntry jarEntry = JarUtil.findJarEntry(url);
-                    isDirectory = jarEntry != null && jarEntry.isDirectory();
+                    JarFile jarFile = JarUtil.toJarFile(url); // Test whether valid jar or not
+                    final String relativePath = JarUtil.resolveRelativePath(url);
+                    if (StringUtils.EMPTY.equals(relativePath)) { // root directory in jar
+                        isDirectory = true;
+                    } else {
+                        JarEntry jarEntry = jarFile.getJarEntry(relativePath);
+                        isDirectory = jarEntry != null && jarEntry.isDirectory();
+                    }
                 } else if (ProtocolConstants.FILE.equals(protocol)) {
                     File classPathFile = new File(url.toURI());
                     isDirectory = classPathFile.isDirectory();

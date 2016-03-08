@@ -5,7 +5,6 @@ package org.confucius.commons.lang.util.jar;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.confucius.commons.lang.constants.FileSuffixConstants;
 import org.confucius.commons.lang.constants.PathConstants;
 import org.confucius.commons.lang.constants.ProtocolConstants;
 import org.confucius.commons.lang.filter.JarEntryFilter;
@@ -113,7 +112,7 @@ public class JarUtil {
     public static String resolveJarAbsolutePath(URL jarURL) throws NullPointerException, IllegalArgumentException {
         assertJarURLProtocol(jarURL);
         String jarURLPath = jarURL.toExternalForm();
-        String jarPath = PathConstants.SLASH + StringUtils.substringBetween(jarURLPath, ":/", FileSuffixConstants.JAR) + FileSuffixConstants.JAR;
+        String jarPath = PathConstants.SLASH + StringUtils.substringBetween(jarURLPath, ":/", "!/");
         jarPath = URLUtil.decode(jarPath);
         File jarFile = new File(jarPath);
         return jarFile.exists() ? jarFile.getAbsolutePath() : null;
@@ -154,15 +153,8 @@ public class JarUtil {
     public static JarEntry findJarEntry(URL jarURL) throws IOException {
         JarFile jarFile = JarUtil.toJarFile(jarURL);
         final String relativePath = JarUtil.resolveRelativePath(jarURL);
-        List<JarEntry> jarEntriesList = filter(jarFile, new JarEntryFilter() {
-            @Override
-            public boolean accept(JarEntry jarEntry) {
-                String jarEntryName = jarEntry.getName();
-                return jarEntryName.equals(relativePath);
-            }
-        });
-
-        return jarEntriesList.isEmpty() ? null : jarEntriesList.get(0);
+        JarEntry jarEntry = jarFile.getJarEntry(relativePath);
+        return jarEntry;
     }
 
 
