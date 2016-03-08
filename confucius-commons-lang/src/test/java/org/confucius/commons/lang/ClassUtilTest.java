@@ -5,6 +5,7 @@ package org.confucius.commons.lang;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
+import org.apache.commons.collections.MapUtils;
 import org.junit.Test;
 
 import java.util.Map;
@@ -51,7 +52,7 @@ public class ClassUtilTest extends AbstractTestCase {
 
     @Test
     public void testFindClassPath() {
-        String classPath = ClassUtil.findClassPath(Map.Entry.class);
+        String classPath = ClassUtil.findClassPath(MapUtils.class);
         Assert.assertNotNull(classPath);
     }
 

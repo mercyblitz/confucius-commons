@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.net.URL;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 /**
@@ -57,5 +58,12 @@ public class JarUtilTest {
     public void testToJarFileOnException() throws Exception {
         URL url = new URL("http://www.google.com");
         JarFile jarFile = JarUtil.toJarFile(url);
+    }
+
+    @Test
+    public void testFindJarEntry() throws Exception {
+        URL resourceURL = ClassLoaderUtil.getClassResource(classLoader, String.class);
+        JarEntry jarEntry = JarUtil.findJarEntry(resourceURL);
+        Assert.assertNotNull(jarEntry);
     }
 }

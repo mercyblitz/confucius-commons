@@ -23,7 +23,7 @@ public class SimpleClassScannerTest extends AbstractTestCase {
 
     @Test
     public void testScan() {
-        Set<Class<?>> classesSet = simpleClassScanner.scan(classLoader, "java.lang");
+        Set<Class<?>> classesSet = simpleClassScanner.scan(classLoader, "org.confucius.commons.lang");
         Assert.assertFalse(classesSet.isEmpty());
         echo(classesSet);
 

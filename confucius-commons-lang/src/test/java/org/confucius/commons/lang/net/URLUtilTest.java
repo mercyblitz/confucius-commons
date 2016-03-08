@@ -5,6 +5,7 @@ package org.confucius.commons.lang.net;
 
 import com.google.common.collect.Maps;
 import junit.framework.Assert;
+import org.apache.commons.lang3.StringUtils;
 import org.confucius.commons.lang.ClassLoaderUtil;
 import org.junit.Test;
 
@@ -99,5 +100,29 @@ public class URLUtilTest {
         parametersMap = URLUtil.resolveParametersMap(url);
         expectedParametersMap = Collections.emptyMap();
         Assert.assertEquals(expectedParametersMap, parametersMap);
+    }
+
+    @Test
+    public void testIsDirectoryURL() throws Exception {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        URL resourceURL = ClassLoaderUtil.getClassResource(classLoader, StringUtils.class);
+        Assert.assertFalse(URLUtil.isDirectoryURL(resourceURL));
+
+        String externalForm = null;
+        externalForm = StringUtils.substringBeforeLast(resourceURL.toExternalForm(), StringUtils.class.getSimpleName() + ".class");
+        resourceURL = new URL(externalForm);
+        Assert.assertTrue(URLUtil.isDirectoryURL(resourceURL));
+
+        resourceURL = ClassLoaderUtil.getClassResource(classLoader, String.class);
+        Assert.assertFalse(URLUtil.isDirectoryURL(resourceURL));
+
+        resourceURL = ClassLoaderUtil.getClassResource(classLoader, getClass());
+        Assert.assertFalse(URLUtil.isDirectoryURL(resourceURL));
+
+
+        externalForm = StringUtils.substringBeforeLast(resourceURL.toExternalForm(), getClass().getSimpleName() + ".class");
+        resourceURL = new URL(externalForm);
+        Assert.assertTrue(URLUtil.isDirectoryURL(resourceURL));
+
     }
 }

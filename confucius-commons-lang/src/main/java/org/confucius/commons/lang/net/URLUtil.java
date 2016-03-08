@@ -5,21 +5,23 @@ package org.confucius.commons.lang.net;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.confucius.commons.lang.constants.Constants;
 import org.confucius.commons.lang.constants.PathConstants;
 import org.confucius.commons.lang.constants.ProtocolConstants;
 import org.confucius.commons.lang.constants.SeparatorConstants;
+import org.confucius.commons.lang.util.jar.JarUtil;
 
 import javax.annotation.Nonnull;
 import java.io.File;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 /**
@@ -212,20 +214,22 @@ public abstract class URLUtil {
      * @return if directory , return <code>true</code>
      */
     public static boolean isDirectoryURL(URL url) {
-        String protocol = url.getProtocol();
-
-        boolean flag = false;
-        if (!ProtocolConstants.FILE.equals(protocol))
-            return flag;
-
-        try {
-            File classPathFile = new File(url.toURI());
-            flag = classPathFile.isDirectory();
-        } catch (URISyntaxException e) {
-            flag = false;
+        boolean isDirectory = false;
+        if (url != null) {
+            String protocol = url.getProtocol();
+            try {
+                if (ProtocolConstants.JAR.equals(protocol)) {
+                    JarEntry jarEntry = JarUtil.findJarEntry(url);
+                    isDirectory = jarEntry != null && jarEntry.isDirectory();
+                } else if (ProtocolConstants.FILE.equals(protocol)) {
+                    File classPathFile = new File(url.toURI());
+                    isDirectory = classPathFile.isDirectory();
+                }
+            } catch (Exception e) {
+                isDirectory = false;
+            }
         }
-
-        return flag;
+        return isDirectory;
     }
 
     /**
@@ -249,6 +253,31 @@ public abstract class URLUtil {
             flag = true;
         }
         return flag;
+    }
+
+    /**
+     * Build multiple paths to URI
+     *
+     * @param paths
+     *         multiple paths
+     * @return URI
+     */
+    public static String buildURI(String... paths) {
+        int length = ArrayUtils.getLength(paths);
+        if (length < 1) {
+            return PathConstants.SLASH;
+        }
+
+        StringBuilder uriBuilder = new StringBuilder(PathConstants.SLASH);
+        for (int i = 0; i < length; i++) {
+            String path = paths[i];
+            uriBuilder.append(path);
+            if (i < length - 1) {
+                uriBuilder.append(PathConstants.SLASH);
+            }
+        }
+
+        return resolvePath(uriBuilder.toString());
     }
 
 }

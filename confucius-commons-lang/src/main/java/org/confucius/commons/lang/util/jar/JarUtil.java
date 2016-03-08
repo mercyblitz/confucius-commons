@@ -91,6 +91,7 @@ public class JarUtil {
         assertJarURLProtocol(jarURL);
         String form = jarURL.toExternalForm();
         String relativePath = StringUtils.substringAfter(form, "!/");
+        relativePath = URLUtil.resolvePath(relativePath);
         return URLUtil.decode(relativePath);
     }
 
@@ -129,6 +130,9 @@ public class JarUtil {
      */
     @Nonnull
     public static List<JarEntry> filter(JarFile jarFile, JarEntryFilter jarEntryFilter) {
+        if (jarFile == null) {
+            return Collections.emptyList();
+        }
         Enumeration<JarEntry> jarEntries = jarFile.entries();
         List<JarEntry> jarEntriesList = Lists.newLinkedList();
         while (jarEntries.hasMoreElements()) {
@@ -138,6 +142,27 @@ public class JarUtil {
             }
         }
         return Collections.unmodifiableList(jarEntriesList);
+    }
+
+    /**
+     * Find {@link JarEntry} from specified <code>url</code>
+     *
+     * @param jarURL
+     *         jar resource url
+     * @return If found , return {@link JarEntry}
+     */
+    public static JarEntry findJarEntry(URL jarURL) throws IOException {
+        JarFile jarFile = JarUtil.toJarFile(jarURL);
+        final String relativePath = JarUtil.resolveRelativePath(jarURL);
+        List<JarEntry> jarEntriesList = filter(jarFile, new JarEntryFilter() {
+            @Override
+            public boolean accept(JarEntry jarEntry) {
+                String jarEntryName = jarEntry.getName();
+                return jarEntryName.equals(relativePath);
+            }
+        });
+
+        return jarEntriesList.isEmpty() ? null : jarEntriesList.get(0);
     }
 
 
