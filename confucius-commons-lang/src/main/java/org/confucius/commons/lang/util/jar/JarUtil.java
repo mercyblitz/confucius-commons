@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.confucius.commons.lang.constants.PathConstants;
 import org.confucius.commons.lang.constants.ProtocolConstants;
+import org.confucius.commons.lang.constants.SeparatorConstants;
 import org.confucius.commons.lang.filter.JarEntryFilter;
 import org.confucius.commons.lang.net.URLUtil;
 
@@ -89,7 +90,7 @@ public class JarUtil {
     public static String resolveRelativePath(URL jarURL) throws NullPointerException, IllegalArgumentException {
         assertJarURLProtocol(jarURL);
         String form = jarURL.toExternalForm();
-        String relativePath = StringUtils.substringAfter(form, "!/");
+        String relativePath = StringUtils.substringAfter(form, SeparatorConstants.JAR_ENTITY);
         relativePath = URLUtil.resolvePath(relativePath);
         return URLUtil.decode(relativePath);
     }
@@ -112,7 +113,7 @@ public class JarUtil {
     public static String resolveJarAbsolutePath(URL jarURL) throws NullPointerException, IllegalArgumentException {
         assertJarURLProtocol(jarURL);
         String jarURLPath = jarURL.toExternalForm();
-        String jarPath = PathConstants.SLASH + StringUtils.substringBetween(jarURLPath, ":/", "!/");
+        String jarPath = PathConstants.SLASH + StringUtils.substringBetween(jarURLPath, ":/", SeparatorConstants.JAR_ENTITY);
         jarPath = URLUtil.decode(jarPath);
         File jarFile = new File(jarPath);
         return jarFile.exists() ? jarFile.getAbsolutePath() : null;

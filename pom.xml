@@ -80,8 +80,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
                 </configuration>
             </plugin>
 
@@ -96,11 +96,11 @@
                     <links>
                         <link>http://java.sun.com/j2se/1.5.0/docs/api/</link>
                     </links>
-                    <charset>GBK</charset>
-                    <docencoding>GBK</docencoding>
-                    <source>1.6</source>
+                    <charset>${project.build.sourceEncoding}</charset>
+                    <docencoding>${project.build.sourceEncoding}</docencoding>
+                    <source>${maven.compiler.source}</source>
                     <doctitle>${project.name}</doctitle>
-                    <sourcepath>${basedir}/src/main/java/com/taobao/tae/open/api</sourcepath>
+                    <sourcepath>${basedir}/src/main/java/org/confucius/commons</sourcepath>
                 </configuration>
             </plugin>
 
