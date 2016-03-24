@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>org.confucius.commons</groupId>
+        <artifactId>confucius-commons-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../confucius-commons-parent</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.confucius.commons.tools</groupId>
+    <artifactId>confucius-commons-tools</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <modules>
+        <module>confucius-commons-tools-attach</module>
+    </modules>
+    <packaging>pom</packaging>
+
+    <properties>
+        <confucius.commons.lang.version>1.0.0-SNAPSHOT</confucius.commons.lang.version>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.confucius.commons</groupId>
+            <artifactId>confucius-commons-lang</artifactId>
+            <version>${confucius.commons.lang.version}</version>
+        </dependency>
+
+        <!-- JDK tools.jar -->
+        <dependency>
+            <groupId>sun.jdk</groupId>
+            <artifactId>tools</artifactId>
+            <version>${jdk.version}</version>
+            <scope>system</scope>
+            <systemPath>${java.home}/../lib/tools.jar</systemPath>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+
+</project>

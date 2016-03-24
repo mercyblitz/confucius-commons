@@ -44,6 +44,7 @@
         <module>confucius-commons-util</module>
         <module>confucius-commons-xml</module>
         <module>confucius-commons-web</module>
+        <module>confucius-commons-tools</module>
     </modules>
 
     <properties>
