@@ -34,6 +34,7 @@ public enum FilterOperator {
             }
             return success;
         }
+
     },
     /**
      * |
@@ -81,5 +82,25 @@ public enum FilterOperator {
      * @version 1.0.0
      * @since 1.0.0
      */
-    abstract public <T> boolean accept(T filteredObject, Filter<T>... filters);
+    public abstract <T> boolean accept(T filteredObject, Filter<T>... filters);
+
+    /**
+     * Create a combined {@link Filter} from multiple filters
+     *
+     * @param filters
+     *         multiple filters
+     * @param <T>
+     * @return a combined {@link Filter}
+     */
+    public final <T> Filter<T> createFilter(final Filter<T>... filters) {
+        final FilterOperator self = this;
+        return new Filter<T>() {
+
+            @Override
+            public boolean accept(T filteredObject) {
+                return self.accept(filteredObject, filters);
+            }
+        };
+    }
+
 }

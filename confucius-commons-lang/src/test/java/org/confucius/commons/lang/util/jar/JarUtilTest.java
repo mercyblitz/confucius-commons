@@ -5,12 +5,18 @@ package org.confucius.commons.lang.util.jar;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.confucius.commons.lang.ClassLoaderUtil;
+import org.confucius.commons.lang.ClassPathUtil;
+import org.confucius.commons.lang.filter.JarEntryFilter;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -24,8 +30,9 @@ import java.util.jar.JarFile;
  */
 public class JarUtilTest {
 
+    private final static File tempDirectory = new File(SystemUtils.JAVA_IO_TMPDIR);
+    private final static File targetDirectory = new File(tempDirectory, "jar-util-extract");
     private final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-
 
     @Test
     public void testResolveRelativePath() {
@@ -65,5 +72,34 @@ public class JarUtilTest {
         URL resourceURL = ClassLoaderUtil.getClassResource(classLoader, String.class);
         JarEntry jarEntry = JarUtil.findJarEntry(resourceURL);
         Assert.assertNotNull(jarEntry);
+    }
+
+    @Before
+    public void init() throws IOException {
+        FileUtils.deleteDirectory(targetDirectory);
+        targetDirectory.mkdirs();
+    }
+
+    @Test
+    public void testExtract() throws IOException {
+        Set<String> classPaths = ClassPathUtil.getClassPaths();
+        for (String classPath : classPaths) {
+            File jarFile = new File(classPath);
+            if (jarFile.exists()) {
+                JarUtil.extract(jarFile, targetDirectory);
+                break;
+            }
+        }
+    }
+
+    @Test
+    public void testExtractWithURL() throws IOException {
+        URL resourceURL = ClassLoaderUtil.getResource(classLoader, ClassLoaderUtil.ResourceType.PACKAGE, "org.apache.commons.lang3");
+        JarUtil.extract(resourceURL, targetDirectory, new JarEntryFilter() {
+            @Override
+            public boolean accept(JarEntry filteredObject) {
+                return !filteredObject.isDirectory();
+            }
+        });
     }
 }

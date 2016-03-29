@@ -4,16 +4,17 @@
 package org.confucius.commons.lang.util.jar;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.collections.EnumerationUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.confucius.commons.lang.constants.PathConstants;
+import org.confucius.commons.lang.constants.FileSuffixConstants;
 import org.confucius.commons.lang.constants.ProtocolConstants;
 import org.confucius.commons.lang.constants.SeparatorConstants;
 import org.confucius.commons.lang.filter.JarEntryFilter;
 import org.confucius.commons.lang.net.URLUtil;
 
 import javax.annotation.Nonnull;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -31,7 +32,6 @@ import java.util.jar.JarFile;
  * @since 1.0.0
  */
 public class JarUtil {
-
 
     /**
      * Create a {@link JarFile} from specified {@link URL} of {@link JarFile}
@@ -112,8 +112,11 @@ public class JarUtil {
     @Nonnull
     public static String resolveJarAbsolutePath(URL jarURL) throws NullPointerException, IllegalArgumentException {
         assertJarURLProtocol(jarURL);
-        String jarURLPath = jarURL.toExternalForm();
-        String jarPath = PathConstants.SLASH + StringUtils.substringBetween(jarURLPath, ":/", SeparatorConstants.JAR_ENTITY);
+        String jarURLPath = jarURL.getPath();
+        String prefix = ":/";
+        boolean hasJarEntryPath = jarURLPath.contains(SeparatorConstants.JAR_ENTITY);
+        String suffix = hasJarEntryPath ? SeparatorConstants.JAR_ENTITY : FileSuffixConstants.JAR;
+        String jarPath = StringUtils.substringBetween(jarURLPath, prefix, suffix);
         jarPath = URLUtil.decode(jarPath);
         File jarFile = new File(jarPath);
         return jarFile.exists() ? jarFile.getAbsolutePath() : null;
@@ -134,9 +137,13 @@ public class JarUtil {
             return Collections.emptyList();
         }
         Enumeration<JarEntry> jarEntries = jarFile.entries();
+        List<JarEntry> jarEntriesList = EnumerationUtils.toList(jarEntries);
+        return doFilter(jarEntriesList, jarEntryFilter);
+    }
+
+    protected static List<JarEntry> doFilter(Iterable<JarEntry> jarEntries, JarEntryFilter jarEntryFilter) {
         List<JarEntry> jarEntriesList = Lists.newLinkedList();
-        while (jarEntries.hasMoreElements()) {
-            JarEntry jarEntry = jarEntries.nextElement();
+        for (JarEntry jarEntry : jarEntries) {
             if (jarEntryFilter == null || jarEntryFilter.accept(jarEntry)) {
                 jarEntriesList.add(jarEntry);
             }
@@ -156,6 +163,121 @@ public class JarUtil {
         final String relativePath = JarUtil.resolveRelativePath(jarURL);
         JarEntry jarEntry = jarFile.getJarEntry(relativePath);
         return jarEntry;
+    }
+
+
+    /**
+     * Extract the source {@link JarFile} to target directory
+     *
+     * @param jarSourceFile
+     *         the source {@link JarFile}
+     * @param targetDirectory
+     *         target directory
+     * @throws IOException
+     *         When the source jar file is an invalid {@link JarFile}
+     */
+    public static void extract(File jarSourceFile, File targetDirectory) throws IOException {
+        extract(jarSourceFile, targetDirectory, null);
+    }
+
+    /**
+     * Extract the source {@link JarFile} to target directory with specified {@link JarEntryFilter}
+     *
+     * @param jarSourceFile
+     *         the source {@link JarFile}
+     * @param targetDirectory
+     *         target directory
+     * @param jarEntryFilter
+     *         {@link JarEntryFilter}
+     * @throws IOException
+     *         When the source jar file is an invalid {@link JarFile}
+     */
+    public static void extract(File jarSourceFile, File targetDirectory, JarEntryFilter jarEntryFilter) throws IOException {
+
+        final JarFile jarFile = new JarFile(jarSourceFile);
+
+        extract(jarFile, targetDirectory, jarEntryFilter);
+    }
+
+    /**
+     * Extract the source {@link JarFile} to target directory with specified {@link JarEntryFilter}
+     *
+     * @param jarFile
+     *         the source {@link JarFile}
+     * @param targetDirectory
+     *         target directory
+     * @param jarEntryFilter
+     *         {@link JarEntryFilter}
+     * @throws IOException
+     *         When the source jar file is an invalid {@link JarFile}
+     */
+    public static void extract(JarFile jarFile, File targetDirectory, JarEntryFilter jarEntryFilter) throws IOException {
+        List<JarEntry> jarEntriesList = filter(jarFile, jarEntryFilter);
+        doExtract(jarFile, jarEntriesList, targetDirectory);
+    }
+
+    /**
+     * Extract the source {@link JarFile} to target directory with specified {@link JarEntryFilter}
+     *
+     * @param jarResourceURL
+     *         The resource URL of {@link JarFile} or {@link JarEntry}
+     * @param targetDirectory
+     *         target directory
+     * @param jarEntryFilter
+     *         {@link JarEntryFilter}
+     * @throws IOException
+     *         When the source jar file is an invalid {@link JarFile}
+     */
+    public static void extract(URL jarResourceURL, File targetDirectory, JarEntryFilter jarEntryFilter) throws IOException {
+        final JarFile jarFile = JarUtil.toJarFile(jarResourceURL);
+        final String relativePath = JarUtil.resolveRelativePath(jarResourceURL);
+        final JarEntry jarEntry = jarFile.getJarEntry(relativePath);
+        final boolean isDirectory = jarEntry.isDirectory();
+        List<JarEntry> jarEntriesList = filter(jarFile, new JarEntryFilter() {
+            @Override
+            public boolean accept(JarEntry filteredObject) {
+                String name = filteredObject.getName();
+                if (isDirectory && name.equals(relativePath)) {
+                    return true;
+                } else if (name.startsWith(relativePath)) {
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        jarEntriesList = doFilter(jarEntriesList, jarEntryFilter);
+
+        doExtract(jarFile, jarEntriesList, targetDirectory);
+    }
+
+    protected static void doExtract(JarFile jarFile, Iterable<JarEntry> jarEntries, File targetDirectory) throws IOException {
+        if (jarEntries != null) {
+            for (JarEntry jarEntry : jarEntries) {
+                String jarEntryName = jarEntry.getName();
+                File targetFile = new File(targetDirectory, jarEntryName);
+                if (jarEntry.isDirectory()) {
+                    targetFile.mkdirs();
+                } else {
+                    InputStream inputStream = null;
+                    OutputStream outputStream = null;
+                    try {
+                        inputStream = jarFile.getInputStream(jarEntry);
+                        if (inputStream != null) {
+                            File parentFile = targetFile.getParentFile();
+                            if (!parentFile.exists()) {
+                                parentFile.mkdirs();
+                            }
+                            outputStream = new FileOutputStream(targetFile);
+                            IOUtils.copy(inputStream, outputStream);
+                        }
+                    } finally {
+                        IOUtils.closeQuietly(outputStream);
+                        IOUtils.closeQuietly(inputStream);
+                    }
+                }
+            }
+        }
     }
 
 
