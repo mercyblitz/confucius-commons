@@ -2,7 +2,6 @@ package org.confucius.commons.lang.management;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.confucius.commons.lang.ClassLoaderUtil;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -26,14 +25,6 @@ public abstract class ManagementUtil {
     private final static RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
 
     /**
-     * sun.management.ManagementFactory class name
-     */
-    private final static String MANAGEMENT_FACTORY_CLASS_NAME = "sun.management.ManagementFactory";
-    /**
-     * sun.management.ManagementFactory {@link Class}
-     */
-    final static Class<?> managementFactoryClass = loadManagementFactoryClass();
-    /**
      * "jvm" Field name
      */
     private final static String JVM_FIELD_NAME = "jvm";
@@ -51,25 +42,16 @@ public abstract class ManagementUtil {
     final static Method getProcessIdMethod = initGetProcessIdMethod();
 
 
-    private static Class<?> loadManagementFactoryClass() {
-        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-        Class<?> managementFactoryClass = ClassLoaderUtil.loadClass(classLoader, MANAGEMENT_FACTORY_CLASS_NAME);
-        if (managementFactoryClass == null) {
-            System.err.printf("Management Factory Class[%s] can't be loaded by ClassLoader[%s]!\n", MANAGEMENT_FACTORY_CLASS_NAME, classLoader.getClass());
-        }
-        return managementFactoryClass;
-    }
-
     private static Object initJvm() {
         Object jvm = null;
         Field jvmField = null;
-        if (managementFactoryClass != null) {
+        if (runtimeMXBean != null) {
             try {
-                jvmField = managementFactoryClass.getDeclaredField(JVM_FIELD_NAME);
+                jvmField = runtimeMXBean.getClass().getDeclaredField(JVM_FIELD_NAME);
                 jvmField.setAccessible(true);
-                jvm = jvmField.get(null);
+                jvm = jvmField.get(runtimeMXBean);
             } catch (Exception ignored) {
-                System.err.printf("The Field[name : %s] can't be found in Management Factory Class[%s]!\n", JVM_FIELD_NAME, managementFactoryClass.getName());
+                System.err.printf("The Field[name : %s] can't be found in RuntimeMXBean Class[%s]!\n", JVM_FIELD_NAME, runtimeMXBean.getClass());
             }
         }
         return jvm;
