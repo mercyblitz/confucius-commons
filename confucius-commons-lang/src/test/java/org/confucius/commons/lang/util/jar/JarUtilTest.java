@@ -82,7 +82,7 @@ public class JarUtilTest {
 
     @Test
     public void testExtract() throws IOException {
-        Set<String> classPaths = ClassPathUtil.getClassPaths();
+        Set<String> classPaths = ClassPathUtil.getBootstrapClassPaths();
         for (String classPath : classPaths) {
             File jarFile = new File(classPath);
             if (jarFile.exists()) {
