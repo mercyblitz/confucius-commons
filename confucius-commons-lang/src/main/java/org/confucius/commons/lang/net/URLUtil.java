@@ -78,7 +78,7 @@ public abstract class URLUtil {
         String prefix = ":/";
         boolean hasJarEntryPath = archiveFilePath.contains(SeparatorConstants.ARCHIVE_ENTITY);
         String suffix = hasJarEntryPath ? SeparatorConstants.ARCHIVE_ENTITY : archiveFileExtensionName;
-        String jarPath = StringUtils.substringBetween(archiveFilePath, prefix, suffix);
+        String jarPath = PathConstants.SLASH + StringUtils.substringBetween(archiveFilePath, prefix, suffix);
         File archiveFile = null;
         if (StringUtils.isNotBlank(jarPath)) {
             jarPath = URLUtil.decode(jarPath);
