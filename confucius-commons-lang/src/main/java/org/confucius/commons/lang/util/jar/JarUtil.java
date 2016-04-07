@@ -112,14 +112,8 @@ public class JarUtil {
     @Nonnull
     public static String resolveJarAbsolutePath(URL jarURL) throws NullPointerException, IllegalArgumentException {
         assertJarURLProtocol(jarURL);
-        String jarURLPath = jarURL.getPath();
-        String prefix = ":/";
-        boolean hasJarEntryPath = jarURLPath.contains(SeparatorConstants.ARCHIVE_ENTITY);
-        String suffix = hasJarEntryPath ? SeparatorConstants.ARCHIVE_ENTITY : FileSuffixConstants.JAR;
-        String jarPath = StringUtils.substringBetween(jarURLPath, prefix, suffix);
-        jarPath = URLUtil.decode(jarPath);
-        File jarFile = new File(jarPath);
-        return jarFile.exists() ? jarFile.getAbsolutePath() : null;
+        File archiveFile = URLUtil.resolveArchiveFile(jarURL, FileSuffixConstants.JAR);
+        return archiveFile == null ? null : archiveFile.getAbsolutePath();
     }
 
     /**

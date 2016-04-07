@@ -63,6 +63,27 @@ public abstract class URLUtil {
         return null;
     }
 
+    /**
+     * Resolve archive file
+     *
+     * @param archiveFileURL
+     *         archive file  URL
+     * @param archiveFileExtensionName
+     *         archive file extension name
+     * @return Resolve archive file If exists
+     * @throws NullPointerException
+     */
+    public static File resolveArchiveFile(URL archiveFileURL, String archiveFileExtensionName) throws NullPointerException {
+        String archiveFilePath = archiveFileURL.getPath();
+        String prefix = ":/";
+        boolean hasJarEntryPath = archiveFilePath.contains(SeparatorConstants.ARCHIVE_ENTITY);
+        String suffix = hasJarEntryPath ? SeparatorConstants.ARCHIVE_ENTITY : archiveFileExtensionName;
+        String jarPath = StringUtils.substringBetween(archiveFilePath, prefix, suffix);
+        jarPath = URLUtil.decode(jarPath);
+        File archiveFile = new File(jarPath);
+        return archiveFile.exists() ? archiveFile : null;
+    }
+
 
     /**
      * Resolve parameters {@link Map} from specified URL，The parameter name as key ，parameter value list as key

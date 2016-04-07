@@ -8,6 +8,7 @@ import junit.framework.Assert;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.confucius.commons.lang.ClassLoaderUtil;
+import org.confucius.commons.lang.constants.FileSuffixConstants;
 import org.junit.Test;
 
 import java.io.File;
@@ -85,6 +86,14 @@ public class URLUtilTest {
         relativePath = URLUtil.resolveRelativePath(resourceURL);
         Assert.assertNull(relativePath);
 
+    }
+
+    @Test
+    public void testResolveArchiveFile() {
+        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+        URL resourceURL = ClassLoaderUtil.getClassResource(classLoader, String.class);
+        File archiveFile = URLUtil.resolveArchiveFile(resourceURL, FileSuffixConstants.JAR);
+        Assert.assertTrue(archiveFile.exists());
     }
 
     @Test
