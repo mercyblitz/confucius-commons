@@ -79,9 +79,13 @@ public abstract class URLUtil {
         boolean hasJarEntryPath = archiveFilePath.contains(SeparatorConstants.ARCHIVE_ENTITY);
         String suffix = hasJarEntryPath ? SeparatorConstants.ARCHIVE_ENTITY : archiveFileExtensionName;
         String jarPath = StringUtils.substringBetween(archiveFilePath, prefix, suffix);
-        jarPath = URLUtil.decode(jarPath);
-        File archiveFile = new File(jarPath);
-        return archiveFile.exists() ? archiveFile : null;
+        File archiveFile = null;
+        if (StringUtils.isNotBlank(jarPath)) {
+            jarPath = URLUtil.decode(jarPath);
+            archiveFile = new File(jarPath);
+            archiveFile = archiveFile.exists() ? archiveFile : null;
+        }
+        return archiveFile;
     }
 
 
