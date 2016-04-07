@@ -43,22 +43,21 @@ public abstract class URLUtil {
     private static final String DEFAULT_ENCODING = "UTF-8";
 
     /**
-     * Resolve Relative path from Jar File URL
+     * Resolve Relative path from Archive File URL
      *
-     * @param jarFileURL
-     *         Jar File URL
-     * @return Relative path in jar
+     * @param archiveFileURL
+     *         Archive File URL
+     * @return Relative path in archive
      * @throws NullPointerException
-     *         <code>jarFileURL</code> is <code>null</code>
+     *         <code>archiveFileURL</code> is <code>null</code>
      * @version 1.0.0
      * @since 1.0.0
      */
-    public static String resolveRelativePath(URL jarFileURL) throws NullPointerException {
+    public static String resolveRelativePath(URL archiveFileURL) throws NullPointerException {
         // NPE check
-        final String protocol = jarFileURL.getProtocol();
-        if (ProtocolConstants.FILE.equals(protocol) || ProtocolConstants.JAR.equals(protocol)) {
-            String form = jarFileURL.toExternalForm();
-            String relativePath = StringUtils.substringAfterLast(form, SeparatorConstants.JAR_ENTITY);
+        String path = archiveFileURL.getPath();
+        if (path.contains(SeparatorConstants.ARCHIVE_ENTITY)) {
+            String relativePath = StringUtils.substringAfterLast(path, SeparatorConstants.ARCHIVE_ENTITY);
             return decode(relativePath);
         }
         return null;

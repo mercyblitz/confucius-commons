@@ -90,7 +90,7 @@ public class JarUtil {
     public static String resolveRelativePath(URL jarURL) throws NullPointerException, IllegalArgumentException {
         assertJarURLProtocol(jarURL);
         String form = jarURL.toExternalForm();
-        String relativePath = StringUtils.substringAfter(form, SeparatorConstants.JAR_ENTITY);
+        String relativePath = StringUtils.substringAfter(form, SeparatorConstants.ARCHIVE_ENTITY);
         relativePath = URLUtil.resolvePath(relativePath);
         return URLUtil.decode(relativePath);
     }
@@ -114,8 +114,8 @@ public class JarUtil {
         assertJarURLProtocol(jarURL);
         String jarURLPath = jarURL.getPath();
         String prefix = ":/";
-        boolean hasJarEntryPath = jarURLPath.contains(SeparatorConstants.JAR_ENTITY);
-        String suffix = hasJarEntryPath ? SeparatorConstants.JAR_ENTITY : FileSuffixConstants.JAR;
+        boolean hasJarEntryPath = jarURLPath.contains(SeparatorConstants.ARCHIVE_ENTITY);
+        String suffix = hasJarEntryPath ? SeparatorConstants.ARCHIVE_ENTITY : FileSuffixConstants.JAR;
         String jarPath = StringUtils.substringBetween(jarURLPath, prefix, suffix);
         jarPath = URLUtil.decode(jarPath);
         File jarFile = new File(jarPath);

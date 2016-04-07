@@ -19,6 +19,10 @@ import org.confucius.commons.lang.io.scanner.SimpleJarEntryScanner;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.CodeSource;
+import java.security.ProtectionDomain;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -47,7 +51,9 @@ public abstract class ClassUtil {
 
     private static Map<String, Set<String>> initClassPathToClassNamesMap() {
         Map<String, Set<String>> classPathToClassNamesMap = Maps.newLinkedHashMap();
-        Set<String> classPaths = ClassPathUtil.getClassPaths();
+        Set<String> classPaths = Sets.newLinkedHashSet();
+        classPaths.addAll(ClassPathUtil.getBootstrapClassPaths());
+        classPaths.addAll(ClassPathUtil.getClassPaths());
         for (String classPath : classPaths) {
             Set<String> classNames = findClassNamesInClassPath(classPath, true);
             classPathToClassNamesMap.put(classPath, classNames);
@@ -279,6 +285,37 @@ public abstract class ClassUtil {
             allClassNames.addAll(classNames);
         }
         return Collections.unmodifiableSet(allClassNames);
+    }
+
+
+    /**
+     * Get {@link Class}'s code source location URL
+     *
+     * @param type
+     * @return If , return <code>null</code>.
+     * @throws NullPointerException
+     *         If <code>type</code> is <code>null</code> , {@link NullPointerException} will be thrown.
+     */
+    public static URL getCodeSourceLocation(Class<?> type) throws NullPointerException {
+
+        URL codeSourceLocation = null;
+        ClassLoader classLoader = type.getClassLoader();
+
+        if (classLoader == null) { // Bootstrap ClassLoader or type is primitive or void
+            String path = findClassPath(type);
+            if (StringUtils.isNotBlank(path)) {
+                try {
+                    codeSourceLocation = new File(path).toURI().toURL();
+                } catch (MalformedURLException ignored) {
+                    codeSourceLocation = null;
+                }
+            }
+        } else {
+            ProtectionDomain protectionDomain = type.getProtectionDomain();
+            CodeSource codeSource = protectionDomain == null ? null : protectionDomain.getCodeSource();
+            codeSourceLocation = codeSource == null ? null : codeSource.getLocation();
+        }
+        return codeSourceLocation;
     }
 
 

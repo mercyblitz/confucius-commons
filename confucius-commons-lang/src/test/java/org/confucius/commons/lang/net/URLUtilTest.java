@@ -6,9 +6,12 @@ package org.confucius.commons.lang.net;
 import com.google.common.collect.Maps;
 import junit.framework.Assert;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.confucius.commons.lang.ClassLoaderUtil;
 import org.junit.Test;
 
+import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
@@ -70,12 +73,18 @@ public class URLUtilTest {
     }
 
     @Test
-    public void testResolveRelativePath() {
+    public void testResolveRelativePath() throws MalformedURLException {
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
         URL resourceURL = ClassLoaderUtil.getClassResource(classLoader, String.class);
         String expectedPath = "java/lang/String.class";
         String relativePath = URLUtil.resolveRelativePath(resourceURL);
         Assert.assertEquals(expectedPath, relativePath);
+
+        File rtJarFile = new File(SystemUtils.JAVA_HOME, "lib/rt.jar");
+        resourceURL = rtJarFile.toURI().toURL();
+        relativePath = URLUtil.resolveRelativePath(resourceURL);
+        Assert.assertNull(relativePath);
+
     }
 
     @Test

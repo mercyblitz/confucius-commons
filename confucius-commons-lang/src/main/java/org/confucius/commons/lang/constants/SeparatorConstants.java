@@ -23,9 +23,9 @@ public interface SeparatorConstants {
     String EXCLAMATION = "!";
 
     /**
-     * Jar Entity Separator : "!/"
+     * Archive Entity Separator : "!/"
      */
-    String JAR_ENTITY = EXCLAMATION + PathConstants.SLASH;
+    String ARCHIVE_ENTITY = EXCLAMATION + PathConstants.SLASH;
 
     /**
      * Query String Separator : "?"

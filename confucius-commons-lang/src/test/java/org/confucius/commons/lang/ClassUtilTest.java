@@ -8,6 +8,8 @@ import junit.framework.TestCase;
 import org.apache.commons.collections.MapUtils;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,6 +56,9 @@ public class ClassUtilTest extends AbstractTestCase {
     public void testFindClassPath() {
         String classPath = ClassUtil.findClassPath(MapUtils.class);
         Assert.assertNotNull(classPath);
+
+        classPath = ClassUtil.findClassPath(String.class);
+        Assert.assertNotNull(classPath);
     }
 
     @Test
@@ -67,4 +72,21 @@ public class ClassUtilTest extends AbstractTestCase {
         Set<String> allClassNames = ClassUtil.getAllClassNamesInClassPaths();
         Assert.assertFalse(allClassNames.isEmpty());
     }
+
+    @Test
+    public void testGetCodeSourceLocation() throws IOException {
+        URL codeSourceLocation = null;
+        Assert.assertNull(codeSourceLocation);
+
+        codeSourceLocation = ClassUtil.getCodeSourceLocation(ClassUtilTest.class);
+        echo("codeSourceLocation : " + codeSourceLocation);
+        Assert.assertNotNull(codeSourceLocation);
+
+        codeSourceLocation = ClassUtil.getCodeSourceLocation(String.class);
+        echo("codeSourceLocation : " + codeSourceLocation);
+        Assert.assertNotNull(codeSourceLocation);
+
+
+    }
+
 }
