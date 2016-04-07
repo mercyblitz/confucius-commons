@@ -78,10 +78,10 @@ public abstract class URLUtil {
         String prefix = ":/";
         boolean hasJarEntryPath = archiveFilePath.contains(SeparatorConstants.ARCHIVE_ENTITY);
         String suffix = hasJarEntryPath ? SeparatorConstants.ARCHIVE_ENTITY : archiveFileExtensionName;
-        String jarPath = PathConstants.SLASH + StringUtils.substringBetween(archiveFilePath, prefix, suffix);
+        String jarPath = StringUtils.substringBetween(archiveFilePath, prefix, suffix);
         File archiveFile = null;
         if (StringUtils.isNotBlank(jarPath)) {
-            jarPath = URLUtil.decode(jarPath);
+            jarPath = PathConstants.SLASH + URLUtil.decode(jarPath);
             archiveFile = new File(jarPath);
             archiveFile = archiveFile.exists() ? archiveFile : null;
         }
