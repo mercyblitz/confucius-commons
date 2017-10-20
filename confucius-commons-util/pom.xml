@@ -12,20 +12,15 @@
 
     <groupId>org.confucius.commons</groupId>
     <artifactId>confucius-commons-util</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
     <name>Confucius Commons Util</name>
     <description>Confucius Commons Util</description>
-
-    <properties>
-        <confucius.commons.lang.version>1.0.0-SNAPSHOT</confucius.commons.lang.version>
-    </properties>
 
     <dependencies>
 
         <dependency>
             <groupId>org.confucius.commons</groupId>
             <artifactId>confucius-commons-lang</artifactId>
-            <version>${confucius.commons.lang.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
