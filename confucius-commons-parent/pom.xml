@@ -27,7 +27,7 @@
         <jsr305.version>3.0.1</jsr305.version>
         <slf4j.version>1.6.1</slf4j.version>
         <log4j.version>1.2.16</log4j.version>
-        <guava.version>19.0.20150826</guava.version>
+        <guava.version>23.0</guava.version>
         <servlet.version>2.4</servlet.version>
         <jsp.version>2.0</jsp.version>
         <junit.version>4.7</junit.version>

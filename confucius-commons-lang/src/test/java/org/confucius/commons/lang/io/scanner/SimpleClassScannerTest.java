@@ -15,7 +15,7 @@ import java.util.Set;
  * @author <a href="mercyblitz@gmail.com">Mercy<a/>
  * @version 1.0.0
  * @see SimpleClassScannerTest
- * @since 1.0.0 2016-02-24
+ * @since 1.0.0
  */
 public class SimpleClassScannerTest extends AbstractTestCase {
 

@@ -11,7 +11,7 @@ import java.util.concurrent.TimeoutException;
  * @author <a href="mailto:mercyblitz@gmail.com">Mercy<a/>
  * @version 1.0.0
  * @see ProcessExecutor
- * @since 1.0.0 2016-01-28
+ * @since 1.0.0
  */
 public class ProcessExecutor {
 

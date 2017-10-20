@@ -5,9 +5,9 @@ package org.confucius.commons.lang.io.scanner;
 
 import junit.framework.Assert;
 import org.confucius.commons.lang.AbstractTestCase;
-import org.confucius.commons.lang.ClassLoaderUtil;
+import org.confucius.commons.lang.ClassLoaderUtils;
 import org.confucius.commons.lang.filter.JarEntryFilter;
-import org.confucius.commons.lang.util.jar.JarUtil;
+import org.confucius.commons.lang.util.jar.JarUtils;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -32,11 +32,11 @@ public class SimpleJarEntryScannerTest extends AbstractTestCase {
 
     @Test
     public void testScan() throws IOException {
-        URL resourceURL = ClassLoaderUtil.getClassResource(classLoader, String.class);
+        URL resourceURL = ClassLoaderUtils.getClassResource(classLoader, String.class);
         Set<JarEntry> jarEntrySet = simpleJarEntryScanner.scan(resourceURL, true);
         Assert.assertEquals(1, jarEntrySet.size());
 
-        JarFile jarFile = JarUtil.toJarFile(resourceURL);
+        JarFile jarFile = JarUtils.toJarFile(resourceURL);
         jarEntrySet = simpleJarEntryScanner.scan(jarFile, true);
         Assert.assertTrue(jarEntrySet.size() > 1000);
 

@@ -1,7 +1,3 @@
-/**
- * Project   : commons-utils File      : SimpleFileScanner.java Date      : 2012-1-4 Time      : 下午04:04:06 Copyright :
- * taobao.com Ltd.
- */
 package org.confucius.commons.lang.io.scanner;
 
 import com.google.common.collect.Sets;
@@ -16,7 +12,7 @@ import java.util.Set;
 /**
  * Simple File Scanner (Single-Thread)
  *
- * @author <a href="mailto:taogu.mxx@taobao.com">Mercy</a>
+ * @author <a href="mailto:mercyblitz@gmail.com">Mercy</a>
  * @see SimpleFileScanner#INSTANCE
  * @see IOFileFilter
  * @since 1.0.0

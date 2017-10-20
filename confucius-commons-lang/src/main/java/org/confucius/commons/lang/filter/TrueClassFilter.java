@@ -9,7 +9,7 @@ package org.confucius.commons.lang.filter;
  * @author <a href="mercyblitz@gmail.com">Mercy<a/>
  * @version 1.0.0
  * @see ClassFilter
- * @since 1.0.0 2016-02-23
+ * @since 1.0.0
  */
 public class TrueClassFilter implements ClassFilter {
 

@@ -6,7 +6,7 @@ package org.confucius.commons.lang.process;
  * @author <a href="mailto:mercyblitz@gmail.com">Mercy<a/>
  * @version 1.0.0
  * @see ProcessExecutorTest
- * @since 1.0.0 2016-01-28
+ * @since 1.0.0
  */
 public class ProcessExecutorTest {
 

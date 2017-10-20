@@ -6,9 +6,9 @@ package org.confucius.commons.lang.io.scanner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
-import org.confucius.commons.lang.ClassLoaderUtil;
-import org.confucius.commons.lang.ClassUtil;
-import org.confucius.commons.lang.filter.FilterUtil;
+import org.confucius.commons.lang.ClassLoaderUtils;
+import org.confucius.commons.lang.ClassUtils;
+import org.confucius.commons.lang.filter.FilterUtils;
 import org.confucius.commons.lang.filter.PackageNameClassNameFilter;
 
 import java.io.File;
@@ -25,7 +25,7 @@ import java.util.Set;
  * @author <a href="mercyblitz@gmail.com">Mercy<a/>
  * @version 1.0.0
  * @see SimpleClassScanner
- * @since 1.0.0 2016-02-24
+ * @since 1.0.0
  */
 public class SimpleClassScanner {
 
@@ -96,19 +96,19 @@ public class SimpleClassScanner {
     public Set<Class<?>> scan(ClassLoader classLoader, String packageName, final boolean recursive, boolean requiredLoad) throws IllegalArgumentException, IllegalStateException {
         Set<Class<?>> classesSet = Sets.newLinkedHashSet();
 
-        final String packageResourceName = ClassLoaderUtil.ResourceType.PACKAGE.resolve(packageName);
+        final String packageResourceName = ClassLoaderUtils.ResourceType.PACKAGE.resolve(packageName);
 
         try {
             Set<String> classNames = Sets.newLinkedHashSet();
             // Find in class loader
-            Set<URL> resourceURLs = ClassLoaderUtil.getResources(classLoader, ClassLoaderUtil.ResourceType.PACKAGE, packageName);
+            Set<URL> resourceURLs = ClassLoaderUtils.getResources(classLoader, ClassLoaderUtils.ResourceType.PACKAGE, packageName);
 
             if (resourceURLs.isEmpty()) {
                 //Find in class path
-                List<String> classNamesInPackage = Lists.newArrayList(ClassUtil.getClassNamesInPackage(packageName));
+                List<String> classNamesInPackage = Lists.newArrayList(ClassUtils.getClassNamesInPackage(packageName));
 
                 if (!classNamesInPackage.isEmpty()) {
-                    String classPath = ClassUtil.findClassPath(classNamesInPackage.get(0));
+                    String classPath = ClassUtils.findClassPath(classNamesInPackage.get(0));
                     URL resourceURL = new File(classPath).toURI().toURL();
                     resourceURLs = Sets.newHashSet(resourceURL);
                 }
@@ -117,12 +117,12 @@ public class SimpleClassScanner {
             for (URL resourceURL : resourceURLs) {
                 URL classPathURL = resolveClassPathURL(resourceURL, packageResourceName);
                 String classPath = classPathURL.getFile();
-                Set<String> classNamesInClassPath = ClassUtil.findClassNamesInClassPath(classPath, true);
+                Set<String> classNamesInClassPath = ClassUtils.findClassNamesInClassPath(classPath, true);
                 classNames.addAll(filterClassNames(classNamesInClassPath, packageName, recursive));
             }
 
             for (String className : classNames) {
-                Class<?> class_ = requiredLoad ? ClassLoaderUtil.loadClass(classLoader, className) : ClassLoaderUtil.findLoadedClass(classLoader, className);
+                Class<?> class_ = requiredLoad ? ClassLoaderUtils.loadClass(classLoader, className) : ClassLoaderUtils.findLoadedClass(classLoader, className);
                 if (class_ != null) {
                     classesSet.add(class_);
                 }
@@ -136,7 +136,7 @@ public class SimpleClassScanner {
 
     private Set<String> filterClassNames(Set<String> classNames, String packageName, boolean recursive) {
         PackageNameClassNameFilter packageNameClassNameFilter = new PackageNameClassNameFilter(packageName, recursive);
-        Set<String> filterClassNames = Sets.newLinkedHashSet(FilterUtil.filter(classNames, packageNameClassNameFilter));
+        Set<String> filterClassNames = Sets.newLinkedHashSet(FilterUtils.filter(classNames, packageNameClassNameFilter));
         return filterClassNames;
     }
 

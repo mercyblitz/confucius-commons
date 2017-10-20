@@ -11,7 +11,7 @@ import java.io.IOException;
  * @author <a href="mailto:mercyblitz@gmail.com">Mercy<a/>
  * @version 1.0.0
  * @see VirtualMachine
- * @since 1.0.0 2016-03-23
+ * @since 1.0.0
  */
 public class VirtualMachineTemplate {
 

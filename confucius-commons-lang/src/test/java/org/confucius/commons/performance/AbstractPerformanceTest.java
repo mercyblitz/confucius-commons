@@ -9,7 +9,7 @@ import org.junit.Ignore;
  * @author <a href="mercyblitz@gmail.com">Mercy<a/>
  * @version 1.0.0
  * @see AbstractPerformanceTest
- * @since 1.0.0 2016-01-31
+ * @since 1.0.0
  */
 @Ignore
 public abstract class AbstractPerformanceTest extends AbstractTestCase {

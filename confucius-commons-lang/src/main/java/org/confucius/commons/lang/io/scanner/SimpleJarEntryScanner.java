@@ -7,7 +7,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.confucius.commons.lang.constants.PathConstants;
 import org.confucius.commons.lang.filter.JarEntryFilter;
-import org.confucius.commons.lang.util.jar.JarUtil;
+import org.confucius.commons.lang.util.jar.JarUtils;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -45,9 +45,9 @@ public class SimpleJarEntryScanner {
      * @throws NullPointerException
      *         If argument <code>null</code>
      * @throws IllegalArgumentException
-     *         <ul> <li>{@link JarUtil#resolveRelativePath(URL)}
+     *         <ul> <li>{@link JarUtils#resolveRelativePath(URL)}
      * @throws IOException
-     *         <ul> <li>{@link JarUtil#toJarFile(URL)}
+     *         <ul> <li>{@link JarUtils#toJarFile(URL)}
      * @since 1.0.0
      */
     @Nonnull
@@ -66,16 +66,16 @@ public class SimpleJarEntryScanner {
      * @throws NullPointerException
      *         If argument <code>null</code>
      * @throws IllegalArgumentException
-     *         {@link JarUtil#resolveJarAbsolutePath(URL)}
+     *         {@link JarUtils#resolveJarAbsolutePath(URL)}
      * @throws IOException
-     *         {@link JarUtil#toJarFile(URL)}
+     *         {@link JarUtils#toJarFile(URL)}
      * @see JarEntryFilter
      * @since 1.0.0
      */
     @Nonnull
     public Set<JarEntry> scan(URL jarURL, final boolean recursive, JarEntryFilter jarEntryFilter) throws NullPointerException, IllegalArgumentException, IOException {
-        String relativePath = JarUtil.resolveRelativePath(jarURL);
-        JarFile jarFile = JarUtil.toJarFile(jarURL);
+        String relativePath = JarUtils.resolveRelativePath(jarURL);
+        JarFile jarFile = JarUtils.toJarFile(jarURL);
         return scan(jarFile, relativePath, recursive, jarEntryFilter);
     }
 
@@ -107,7 +107,7 @@ public class SimpleJarEntryScanner {
 
     protected Set<JarEntry> scan(JarFile jarFile, String relativePath, final boolean recursive, JarEntryFilter jarEntryFilter) throws NullPointerException, IllegalArgumentException, IOException {
         Set<JarEntry> jarEntriesSet = Sets.newLinkedHashSet();
-        List<JarEntry> jarEntriesList = JarUtil.filter(jarFile, jarEntryFilter);
+        List<JarEntry> jarEntriesList = JarUtils.filter(jarFile, jarEntryFilter);
 
         for (JarEntry jarEntry : jarEntriesList) {
             String jarEntryName = jarEntry.getName();

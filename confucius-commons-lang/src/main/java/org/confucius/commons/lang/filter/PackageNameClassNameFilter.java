@@ -3,7 +3,7 @@
  */
 package org.confucius.commons.lang.filter;
 
-import org.confucius.commons.lang.ClassUtil;
+import org.confucius.commons.lang.ClassUtils;
 
 /**
  * {@link PackageNameClassNameFilter}
@@ -11,7 +11,7 @@ import org.confucius.commons.lang.ClassUtil;
  * @author <a href="mercyblitz@gmail.com">Mercy<a/>
  * @version 1.0.0
  * @see PackageNameClassNameFilter
- * @since 1.0.0 2016-02-23
+ * @since 1.0.0
  */
 public class PackageNameClassNameFilter implements Filter<String> {
 
@@ -35,7 +35,7 @@ public class PackageNameClassNameFilter implements Filter<String> {
 
     @Override
     public boolean accept(String className) {
-        String packageName = ClassUtil.resolvePackageName(className);
+        String packageName = ClassUtils.resolvePackageName(className);
         boolean accepted = packageName.equals(this.packageName);
         if (!accepted && includedSubPackages) {
             accepted = packageName.startsWith(subPackageNamePrefix);
