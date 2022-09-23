@@ -250,6 +250,9 @@ public class JarUtils {
             for (JarEntry jarEntry : jarEntries) {
                 String jarEntryName = jarEntry.getName();
                 File targetFile = new File(targetDirectory, jarEntryName);
+                if (!targetFile.toPath().normalize().startsWith(targetDirectory.toPath().normalize())) {
+                    throw new IOException("Bad zip entry");
+                }
                 if (jarEntry.isDirectory()) {
                     targetFile.mkdirs();
                 } else {
